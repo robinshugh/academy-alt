@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f3ea" />
+    <title>Academy Alt</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="app" class="app-shell">
+      <section id="loginView" class="view login-view">
+        <div class="login-panel">
+          <div class="brand-row">
+            <div class="brand-mark" aria-hidden="true">A</div>
+            <div>
+              <h1>Academy Alt</h1>
+              <p>UK Year 3-4 Maths</p>
+            </div>
+          </div>
+
+          <form id="loginForm" class="login-form">
+            <label>
+              <span>Name</span>
+              <input id="usernameInput" autocomplete="username" value="alex" />
+            </label>
+            <label>
+              <span>Password</span>
+              <input id="passwordInput" type="password" autocomplete="current-password" value="1234" />
+            </label>
+            <button class="primary-button" type="submit">Log in</button>
+            <p id="loginError" class="form-error" role="alert"></p>
+          </form>
+
+          <div class="demo-access" aria-label="Demo accounts">
+            <span>Child: alex / 1234</span>
+            <span>Parent: parent / parent123</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="studentView" class="view" hidden>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Student</p>
+            <h2 id="studentTitle">Maths Practice</h2>
+          </div>
+          <button id="studentLogoutButton" class="secondary-button" type="button">Log out</button>
+        </header>
+
+        <div class="student-grid">
+          <section class="student-workspace" aria-live="polite">
+            <div id="studentHome" class="workspace-section">
+              <div id="studentPracticeTabs" class="practice-tabs" aria-label="Practice modes">
+                <button class="active" type="button" data-practice-mode="today">Today's Practice</button>
+                <button type="button" data-practice-mode="subject">Subject Quiz</button>
+                <button type="button" data-practice-mode="challenge">Challenges</button>
+                <button type="button" data-practice-mode="review">Review</button>
+                <button type="button" data-practice-mode="reading">Reading</button>
+              </div>
+              <p id="practiceModeDetail" class="practice-mode-detail">20 questions across all subjects, selected from your latest ability profile.</p>
+              <div id="subjectQuizControls" class="subject-quiz-controls" hidden>
+                <label>
+                  <span>Subject</span>
+                  <select id="subjectQuizSelect">
+                    <option value="maths">Math</option>
+                    <option value="english">English Language</option>
+                    <option value="verbal">Verbal Reasoning</option>
+                    <option value="non_verbal">Non Verbal</option>
+                  </select>
+                </label>
+              </div>
+              <button id="startPracticeButton" class="primary-button large-action" type="button">Start Today's Practice</button>
+            </div>
+
+            <div id="quizPanel" class="workspace-section quiz-panel" hidden>
+              <div class="quiz-topline">
+                <span id="quizProgress">Question 1 of 8</span>
+                <span class="quiz-time-display">
+                  <span id="questionTargetTime">Target 35s</span>
+                  <span id="questionTimer">0s</span>
+                </span>
+              </div>
+              <div class="question-area">
+                <p id="questionSkill" class="eyebrow">Skill</p>
+                <h3 id="questionPrompt">Question prompt</h3>
+                <div id="stimulusArea" class="stimulus-area" hidden></div>
+                <div id="answerArea" class="answer-area"></div>
+              </div>
+
+              <fieldset class="confidence-field">
+                <legend>Choose confidence to submit</legend>
+                <div id="confidenceControls" class="confidence-actions">
+                  <button type="button" data-confidence="1">No idea</button>
+                  <button type="button" data-confidence="2">50/50</button>
+                  <button type="button" data-confidence="3">Pretty Sure</button>
+                  <button type="button" data-confidence="4">Certain</button>
+                </div>
+              </fieldset>
+
+              <p id="quizError" class="form-error" role="alert"></p>
+            </div>
+
+            <div id="sessionSummary" class="workspace-section" hidden>
+              <div class="section-heading">
+                <p class="eyebrow">Session Complete</p>
+                <h3 id="sessionSummaryTitle">Summary</h3>
+              </div>
+              <div id="sessionSummaryMetrics" class="metric-strip"></div>
+              <div id="errorReviewList" class="review-list"></div>
+              <button id="backToStudentHomeButton" class="secondary-button" type="button">Back to practice</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="parentView" class="view" hidden>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Parent</p>
+            <h2>Progress Dashboard</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="simulateHeatmapButton" class="secondary-button" type="button">Simulate heatmap</button>
+            <button id="resetDemoButton" class="secondary-button" type="button">Reset data</button>
+            <button id="parentLogoutButton" class="secondary-button" type="button">Log out</button>
+          </div>
+        </header>
+
+        <section class="parent-dashboard-shell">
+          <aside class="parent-dashboard-nav" aria-label="Progress dashboard sections">
+            <p class="eyebrow">Dashboard</p>
+            <div id="parentDashboardNav" class="parent-nav-list">
+              <button type="button" data-parent-page="overview">Overview</button>
+              <button type="button" data-parent-page="ability">Ability Matrix</button>
+              <button type="button" data-parent-page="activity">Recent Activity</button>
+              <button type="button" data-parent-page="mistakes">Mistakes</button>
+              <button type="button" data-parent-page="curriculum">Curriculum</button>
+              <button type="button" data-parent-page="alerts">Email Alerts</button>
+            </div>
+          </aside>
+
+          <section class="dashboard-grid" aria-live="polite">
+            <div class="dashboard-panel dashboard-page" data-dashboard-page="overview">
+              <div class="section-heading">
+                <p class="eyebrow">Overview</p>
+                <h3 id="parentOverviewTitle">Alex</h3>
+              </div>
+              <div id="parentMetrics" class="metric-strip"></div>
+            </div>
+
+            <div class="dashboard-panel dashboard-page" data-dashboard-page="ability">
+              <div class="section-heading">
+                <p class="eyebrow">Ability Matrix</p>
+                <h3>Topic heatmap</h3>
+              </div>
+              <div id="abilityHeatmap" class="ability-heatmap"></div>
+            </div>
+
+            <div class="dashboard-panel dashboard-page" data-dashboard-page="activity">
+              <div class="section-heading">
+                <p class="eyebrow">Recent Activity</p>
+                <h3>Sessions</h3>
+              </div>
+              <div id="sessionList" class="session-list"></div>
+            </div>
+
+            <div class="dashboard-panel dashboard-page" data-dashboard-page="mistakes">
+              <div class="section-heading">
+                <p class="eyebrow">Mistakes</p>
+                <h3>Error review</h3>
+              </div>
+              <div class="mistake-controls">
+                <label>
+                  <span>Subject</span>
+                  <select id="mistakeSubjectFilter">
+                    <option value="all">All subjects</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Topic</span>
+                  <select id="mistakeTopicFilter">
+                    <option value="all">All topics</option>
+                  </select>
+                </label>
+                <button id="mistakeTimeSortButton" class="secondary-button" type="button">Time: slowest first</button>
+                <button id="mistakeTakenSortButton" class="secondary-button" type="button">Taken: newest first</button>
+              </div>
+              <p id="mistakeFilterSummary" class="filter-summary"></p>
+              <div id="parentErrorList" class="review-list"></div>
+            </div>
+
+            <div class="dashboard-panel dashboard-page curriculum-panel" data-dashboard-page="curriculum">
+              <div class="section-heading">
+                <p class="eyebrow">Curriculum</p>
+                <h3>Subject topics</h3>
+              </div>
+              <div id="curriculumSubjectTabs" class="subject-tabs" aria-label="Curriculum subjects"></div>
+              <div class="curriculum-browser">
+                <div id="curriculumTopicList" class="curriculum-topic-list" aria-label="Curriculum topics"></div>
+                <div id="curriculumDetail" class="curriculum-detail"></div>
+              </div>
+            </div>
+
+            <div class="dashboard-panel dashboard-page" data-dashboard-page="alerts">
+              <div class="section-heading">
+                <p class="eyebrow">Email Alerts</p>
+                <h3>Activity outbox</h3>
+              </div>
+              <div id="alertOutbox" class="alert-list"></div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

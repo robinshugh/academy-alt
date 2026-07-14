@@ -1,0 +1,828 @@
+{
+  "version": "0.2.0",
+  "curriculum": {
+    "country": "UK and US",
+    "basis": [
+      "UK National Curriculum style",
+      "US grade-level style",
+      "11+ reasoning style"
+    ],
+    "stage": "Ages 8-15"
+  },
+  "subjects": [
+    {
+      "id": "maths",
+      "display_name": "Math",
+      "strands": [
+        {
+          "id": "number",
+          "label": "Number",
+          "skills": [
+            {
+              "id": "math_number_place_value",
+              "label": "Number and place value",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_four_operations",
+                "math_fractions",
+                "math_decimals_percentages"
+              ]
+            },
+            {
+              "id": "math_four_operations",
+              "label": "Four operations",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_fractions",
+                "math_decimals_percentages"
+              ]
+            },
+            {
+              "id": "math_decimals_percentages",
+              "label": "Decimals and percentages",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_fractions"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fractions",
+          "label": "Fractions",
+          "skills": [
+            {
+              "id": "math_fractions",
+              "label": "Fractions equivalence and operations",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_decimals_percentages"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ratio",
+          "label": "Ratio",
+          "skills": [
+            {
+              "id": "math_ratio_proportion",
+              "label": "Ratio and proportion",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_fractions"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "algebra",
+          "label": "Algebra",
+          "skills": [
+            {
+              "id": "math_algebra",
+              "label": "Algebraic thinking and equations",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_fractions"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "geometry",
+          "label": "Geometry",
+          "skills": [
+            {
+              "id": "math_geometry",
+              "label": "Geometry, angles and properties of shapes",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_fractions"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "statistics",
+          "label": "Statistics",
+          "skills": [
+            {
+              "id": "math_statistics",
+              "label": "Statistics and probability",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "math_number_place_value",
+                "math_four_operations",
+                "math_fractions"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "english",
+      "display_name": "English Language",
+      "strands": [
+        {
+          "id": "reading",
+          "label": "Reading",
+          "skills": [
+            {
+              "id": "english_reading_comprehension",
+              "label": "Reading fluency and comprehension",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_inference",
+                "english_vocabulary",
+                "english_grammar"
+              ]
+            },
+            {
+              "id": "english_inference",
+              "label": "Inference and evidence",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_vocabulary",
+                "english_grammar"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "vocabulary",
+          "label": "Vocabulary",
+          "skills": [
+            {
+              "id": "english_vocabulary",
+              "label": "Vocabulary and context clues",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_grammar"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "grammar",
+          "label": "Grammar",
+          "skills": [
+            {
+              "id": "english_grammar",
+              "label": "Grammar and sentence structure",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_vocabulary"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "writing",
+          "label": "Writing",
+          "skills": [
+            {
+              "id": "english_punctuation",
+              "label": "Punctuation, spelling and mechanics",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_vocabulary"
+              ]
+            },
+            {
+              "id": "english_narrative",
+              "label": "Narrative writing",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_vocabulary"
+              ]
+            },
+            {
+              "id": "english_argument",
+              "label": "Opinion and argument writing",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_vocabulary"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "literature",
+          "label": "Literature",
+          "skills": [
+            {
+              "id": "english_literary_analysis",
+              "label": "Literary analysis and figurative language",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "english_reading_comprehension",
+                "english_inference",
+                "english_vocabulary"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verbal",
+      "display_name": "Verbal Reasoning",
+      "strands": [
+        {
+          "id": "vocabulary",
+          "label": "Vocabulary",
+          "skills": [
+            {
+              "id": "verbal_synonyms_antonyms",
+              "label": "Synonyms and antonyms",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_analogies",
+                "verbal_odd_one_out",
+                "verbal_letter_sequences"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "relationships",
+          "label": "Relationships",
+          "skills": [
+            {
+              "id": "verbal_analogies",
+              "label": "Analogies",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_odd_one_out",
+                "verbal_letter_sequences"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "classification",
+          "label": "Classification",
+          "skills": [
+            {
+              "id": "verbal_odd_one_out",
+              "label": "Odd one out and word groups",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_letter_sequences"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sequences",
+          "label": "Sequences",
+          "skills": [
+            {
+              "id": "verbal_letter_sequences",
+              "label": "Letter sequences",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_odd_one_out"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "codes",
+          "label": "Codes",
+          "skills": [
+            {
+              "id": "verbal_codes",
+              "label": "Letter and word codes",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_odd_one_out"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cloze",
+          "label": "Cloze",
+          "skills": [
+            {
+              "id": "verbal_cloze",
+              "label": "Missing words and sentence completion",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_odd_one_out"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "logic",
+          "label": "Logic",
+          "skills": [
+            {
+              "id": "verbal_deduction",
+              "label": "Verbal deduction",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_odd_one_out"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "reading_reasoning",
+          "label": "Reading reasoning",
+          "skills": [
+            {
+              "id": "verbal_short_passage",
+              "label": "Short-passage verbal reasoning",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "verbal_synonyms_antonyms",
+                "verbal_analogies",
+                "verbal_odd_one_out"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "non_verbal",
+      "display_name": "Non Verbal",
+      "strands": [
+        {
+          "id": "pattern",
+          "label": "Pattern",
+          "skills": [
+            {
+              "id": "nonverbal_shape_sequences",
+              "label": "Shape sequences",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices",
+                "nonverbal_rotation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "classification",
+          "label": "Classification",
+          "skills": [
+            {
+              "id": "nonverbal_odd_one_out",
+              "label": "Odd one out with visual properties",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_matrices",
+                "nonverbal_rotation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "matrices",
+          "label": "Matrices",
+          "skills": [
+            {
+              "id": "nonverbal_matrices",
+              "label": "Figure matrices",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_rotation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "transformations",
+          "label": "Transformations",
+          "skills": [
+            {
+              "id": "nonverbal_rotation",
+              "label": "Rotation",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices"
+              ]
+            },
+            {
+              "id": "nonverbal_reflection",
+              "label": "Reflection and symmetry",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "spatial",
+          "label": "Spatial",
+          "skills": [
+            {
+              "id": "nonverbal_nets_folding",
+              "label": "Nets and folding",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices"
+              ]
+            },
+            {
+              "id": "nonverbal_counting_shapes",
+              "label": "Counting blocks and embedded shapes",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "relationships",
+          "label": "Relationships",
+          "skills": [
+            {
+              "id": "nonverbal_shape_analogies",
+              "label": "Shape analogies",
+              "year_band": [
+                "age_8",
+                "age_9",
+                "age_10",
+                "age_11",
+                "age_12",
+                "age_13",
+                "age_14",
+                "age_15"
+              ],
+              "prerequisites": [],
+              "linked_skills": [
+                "nonverbal_shape_sequences",
+                "nonverbal_odd_one_out",
+                "nonverbal_matrices"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

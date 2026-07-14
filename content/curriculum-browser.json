@@ -1,0 +1,1603 @@
+{
+  "version": "0.1.0",
+  "age_range": "8-15",
+  "grade_mapping": "Approximate mapping: age 8 = UK Year 3 / US Grade 3, age 9 = UK Year 4 / US Grade 4, age 10 = UK Year 5 / US Grade 5, age 11 = UK Year 6 / US Grade 6, age 12 = UK Year 7 / US Grade 7, age 13 = UK Year 8 / US Grade 8, age 14 = UK Year 9 / US Grade 9, age 15 = UK Year 10 / US Grade 10.",
+  "subjects": [
+    {
+      "id": "math",
+      "name": "Math",
+      "summary": "Consolidated from UK National Curriculum maths, Common Core maths, Khan Academy course sequencing and 11+ maths/reasoning preparation.",
+      "topics": [
+        {
+          "id": "math_number_place_value",
+          "strand": "Number",
+          "title": "Number and place value",
+          "description": "Read, write, order, compare, round and reason with whole numbers, decimals and negative numbers.",
+          "alignment": "UK: number and place value across KS2 and KS3. US: Common Core Number and Operations in Base Ten and Number System.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "What is the value of the digit 6 in 462?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Round 48,763 to the nearest 1,000."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Write 6,304,012 in expanded form."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Put these in order: -2, 0.4, -0.5, 1/3."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Write 320,000 as 3.2 x 10^n. What is n?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Write 0.00072 in standard form."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "A distance is 4.6 x 10^8 m. Write it as an ordinary number and in kilometres."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "A value rounded to 3 significant figures is 0.00497. Give the upper and lower bounds."
+            }
+          ]
+        },
+        {
+          "id": "math_four_operations",
+          "strand": "Number",
+          "title": "Four operations",
+          "description": "Fluent mental and written methods for addition, subtraction, multiplication and division, including order of operations.",
+          "alignment": "UK: KS2 written and mental calculation, KS3 calculation strategies. US: Common Core operations and rational-number operations.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Work out 346 + 278."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Work out 6,402 - 2,785."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Work out 38 x 24."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Work out 4,368 divided by 12."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Evaluate 18 - 3 x (4 - 9)."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Evaluate -18 + 6 x (4 - 9) and explain the order of operations used."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Work out (3/4 - 2/5) divided by 7/10. Give your answer in simplest form."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Simplify 3sqrt(12) - sqrt(27) + 2sqrt(3)."
+            }
+          ]
+        },
+        {
+          "id": "math_fractions",
+          "strand": "Fractions",
+          "title": "Fractions equivalence and operations",
+          "description": "Understand fractions as numbers, compare and simplify them, then add, subtract, multiply and divide fractions.",
+          "alignment": "UK: KS2 fractions and KS3 rational-number work. US: Common Core Number and Operations - Fractions and rational numbers.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which is larger: 1/2 or 1/4?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Complete: 3/4 = ?/20."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Work out 2/3 + 1/6."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Work out 5/6 - 1/4."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Work out 2/3 x 3/5, then simplify."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Work out 5/6 divided by 2/3."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Solve x/3 + 2/5 = 7/10."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Simplify (x^2 - 9) / (x + 3), stating any excluded value of x."
+            }
+          ]
+        },
+        {
+          "id": "math_decimals_percentages",
+          "strand": "Number",
+          "title": "Decimals and percentages",
+          "description": "Link fractions, decimals and percentages; compare, round and calculate with them in practical contexts.",
+          "alignment": "UK: decimals and percentages in upper KS2 and proportional reasoning in KS3. US: decimal fractions, percent and rational-number applications.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Write 4 tenths as a decimal."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Which is greater: 0.37 or 0.4?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Find 35% of 80."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Increase 60 by 15%."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Write 0.125 as a fraction and as a percentage."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "A price increases by 10% and then decreases by 10%. Is the final price the same as the original? Explain."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "A jacket costs GBP 68 after a 15% discount. What was the original price?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "GBP 1,200 is invested at 3.5% compound interest for 3 years. Find the final amount to the nearest penny."
+            }
+          ]
+        },
+        {
+          "id": "math_ratio_proportion",
+          "strand": "Ratio",
+          "title": "Ratio and proportion",
+          "description": "Use multiplicative comparison, equivalent ratios, scale factors, rates and proportional relationships.",
+          "alignment": "UK: Year 6 ratio/proportion and KS3 rates of change. US: Common Core Ratios and Proportional Relationships.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "There are 2 red counters for every 3 blue counters. How many counters are there if there are 6 red counters?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A recipe uses 3 eggs for 12 cakes. How many eggs for 24 cakes?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Split 30 sweets in the ratio 2:3."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "A map scale is 1 cm to 5 km. What distance is 7 cm?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "A graph shows y = 4x. What is y when x = 7, and what is the constant of proportionality?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "y is directly proportional to x. When x = 6, y = 42. Find y when x = 11."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "y is inversely proportional to x. When x = 4, y = 18. Find y when x = 9."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Two similar solids have side lengths in the ratio 2:5. Their smaller volume is 64 cm^3. Find the larger volume."
+            }
+          ]
+        },
+        {
+          "id": "math_algebra",
+          "strand": "Algebra",
+          "title": "Algebraic thinking and equations",
+          "description": "Move from missing-number problems to expressions, formulae, equations, simplification and pattern generalisation.",
+          "alignment": "UK: Year 6 algebra and KS3 algebra. US: Common Core patterns, expressions and equations.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "7 + ? = 19. What is the missing number?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "3 x n = 27. What is n?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Evaluate 4a + 3 when a = 5."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Solve 2x + 5 = 17."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Simplify 3(2x - 1) + x."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Expand and simplify 4(2x - 3) - 2(x + 5)."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Solve the simultaneous equations: 2x + y = 11 and x - y = 1."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Solve x^2 - 5x - 24 = 0."
+            }
+          ]
+        },
+        {
+          "id": "math_geometry",
+          "strand": "Geometry",
+          "title": "Geometry, angles and properties of shapes",
+          "description": "Recognise, classify, draw and reason about 2-D and 3-D shapes, angles, symmetry and circles.",
+          "alignment": "UK: geometry across KS2 and KS3. US: Common Core Geometry.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "How many right angles does a rectangle have?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Name a quadrilateral with exactly one pair of parallel sides."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Two angles on a straight line are 65 degrees and x. What is x?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "A triangle has angles 48 and 72 degrees. Find the third angle."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "A circle has radius 5 cm. What is its diameter?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Find the interior angle of a regular 12-sided polygon."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "A right triangle has shorter sides 9 cm and 12 cm. Find the hypotenuse."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "A ladder 5 m long leans against a wall at 68 degrees to the ground. How high up the wall does it reach?"
+            }
+          ]
+        },
+        {
+          "id": "math_statistics",
+          "strand": "Statistics",
+          "title": "Statistics and probability",
+          "description": "Represent, interpret and compare data; understand averages, probability models and chance.",
+          "alignment": "UK: statistics across KS2 and KS3. US: Common Core Measurement/Data and Statistics/Probability.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "A bar chart shows 8 apples and 5 bananas. How many more apples?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A line graph rises from 12 to 20. What is the increase?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Find the mean of 4, 7, 9, 10."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "In a pie chart of 40 pupils, 10 choose football. What angle should football be?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "A bag has 3 red and 5 blue counters. What is P(red)?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "A fair spinner has sectors 1, 2, 3 and 4. It is spun twice. What is the probability of getting a total of 7?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Estimate the mean from a grouped frequency table with intervals 0-10, 10-20, 20-30."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "A medical test is 95% accurate for people with a condition and 90% accurate for people without it. What extra information is needed to find P(condition | positive test)?"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "english",
+      "name": "English Language",
+      "summary": "Consolidated from UK National Curriculum English, Common Core ELA and Khan Academy ELA/grammar coverage.",
+      "topics": [
+        {
+          "id": "english_reading_comprehension",
+          "strand": "Reading",
+          "title": "Reading fluency and comprehension",
+          "description": "Read age-appropriate fiction, poetry, drama and nonfiction with accuracy, stamina and literal understanding.",
+          "alignment": "UK: KS2 reading and KS3 increasingly challenging texts. US: Common Core Reading Literature and Informational Text.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Read a short fable. What problem does the main character face?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Read a nonfiction paragraph. Which sentence states the main idea?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Read two paragraphs. Summarise the key point in one sentence."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Read an article extract. Which evidence best supports the author's claim?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Read a short essay. How does the structure help the argument develop?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Read a persuasive article. How does the writer guide the reader from problem to solution?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Evaluate how the writer uses structure to build tension across the extract."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Compare how two nonfiction texts present different attitudes to technology."
+            }
+          ]
+        },
+        {
+          "id": "english_inference",
+          "strand": "Reading",
+          "title": "Inference and evidence",
+          "description": "Infer feelings, motives, viewpoints and implied meaning, then justify answers with textual evidence.",
+          "alignment": "UK: KS2 inference and justification; KS3 inference and evidence. US: Common Core inference, evidence and analysis.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Mia slammed the door and wiped her eyes. How is Mia feeling? What clue tells you?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A character says 'Fine' but avoids eye contact. What might they really mean?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Find two details that show the narrator is nervous."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Which quotation best supports the idea that the speaker is unreliable?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Explain how a writer implies a character's motive without stating it directly."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "A narrator praises a character but describes their actions as selfish. What can you infer about the narrator?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Identify two details that imply a speaker is biased, and explain their effect."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Synthesize evidence from two paragraphs to infer the writer's unstated criticism."
+            }
+          ]
+        },
+        {
+          "id": "english_vocabulary",
+          "strand": "Vocabulary",
+          "title": "Vocabulary and context clues",
+          "description": "Use context, morphology, word roots and reference skills to clarify word meanings and nuance.",
+          "alignment": "UK: vocabulary, morphology, dictionaries and thesaurus use. US: Common Core Language vocabulary acquisition.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "In 'The path was narrow', what does narrow mean?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Use context to choose the meaning of 'bark': The tree's bark was rough."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "What does the prefix 'mis-' mean in 'misjudge'?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Choose the best synonym for 'reluctant' in this sentence."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Explain the difference between 'assert', 'argue' and 'suggest'."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Use context and word roots to infer the meaning of \"benevolent\" in a sentence."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Explain how the words \"slithered\", \"hissed\" and \"coiled\" create a semantic field."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Choose the most precise academic word to replace \"shows\" in an analytical paragraph, and justify your choice."
+            }
+          ]
+        },
+        {
+          "id": "english_grammar",
+          "strand": "Grammar",
+          "title": "Grammar and sentence structure",
+          "description": "Understand parts of speech, clauses, phrases, tense, agreement and sentence variety.",
+          "alignment": "UK: grammar appendix and KS2-KS3 grammar/vocabulary. US: Common Core Language conventions.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Identify the verb in: The dog chased the ball."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Add an adjective to improve: The house stood on the hill."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Identify the subordinate clause: Although it rained, we played."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Rewrite using the passive voice: The team scored three goals."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Combine two clauses using a semicolon correctly."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Rewrite a simple sentence as a complex sentence using a subordinate clause at the start."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Explain how a series of short sentences changes the pace of a narrative."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Analyse how sentence structure supports the writer's argument in a short persuasive paragraph."
+            }
+          ]
+        },
+        {
+          "id": "english_punctuation",
+          "strand": "Writing",
+          "title": "Punctuation, spelling and mechanics",
+          "description": "Apply punctuation, capitalisation, spelling patterns and proofreading conventions accurately.",
+          "alignment": "UK: spelling, punctuation and grammar. US: Common Core Language conventions.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Add capital letters and full stops: today we visited london"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Choose the correct homophone: Their/There/They're coats are wet."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Add commas to separate items in a list."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Add punctuation for direct speech."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Correct the punctuation and agreement errors in a complex sentence."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Punctuate a sentence containing embedded clauses and direct speech."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Use a colon, semicolon and dash correctly in three linked sentences."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Edit a paragraph for formal academic tone, punctuation accuracy and sentence control."
+            }
+          ]
+        },
+        {
+          "id": "english_narrative",
+          "strand": "Writing",
+          "title": "Narrative writing",
+          "description": "Plan, draft and revise stories with setting, character, atmosphere, dialogue and coherent plot.",
+          "alignment": "UK: KS2-KS3 writing composition. US: Common Core narrative writing standards.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Write three sentences opening a story in a forest."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Write a paragraph that introduces a character through action."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Write a short scene using dialogue and description."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Write a story opening that creates suspense without saying 'scary'."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Write a scene that shifts pace from calm to urgent."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Write a scene from two viewpoints, showing how each character interprets the same event differently."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Write an opening that uses setting, motif and delayed information to create intrigue."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Write a concise exam-style narrative opening that establishes voice, conflict and atmosphere in 250 words."
+            }
+          ]
+        },
+        {
+          "id": "english_argument",
+          "strand": "Writing",
+          "title": "Opinion and argument writing",
+          "description": "Develop opinions and arguments using claims, reasons, evidence, counterpoints and appropriate tone.",
+          "alignment": "UK: reasoned justification and arguments/debates. US: Common Core opinion and argument writing.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Give one reason why playtime should be longer."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Write a short opinion paragraph with two reasons."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Write a claim and evidence about whether homework helps."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Write a balanced paragraph including a counterargument."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Evaluate which of two pieces of evidence better supports a claim."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Write a paragraph with a claim, evidence, explanation and a counterpoint."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Analyse how rhetorical questions and repetition strengthen a speech."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Write a thesis paragraph that includes a concession and a clear line of argument."
+            }
+          ]
+        },
+        {
+          "id": "english_literary_analysis",
+          "strand": "Literature",
+          "title": "Literary analysis and figurative language",
+          "description": "Discuss themes, conventions, imagery, metaphor, simile, tone, structure and authorial choices.",
+          "alignment": "UK: upper KS2 and KS3 literary study. US: Common Core literature analysis and language standards.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Find a simile in this sentence: The moon was like a coin."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "What mood is created by 'grey clouds crowded the sky'?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "What theme is suggested by a story about sharing?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Explain how a metaphor changes the reader's view of a character."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Compare how two texts present courage."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Explain how imagery of light and darkness develops a theme in a short extract."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Compare how two poems use natural imagery to present conflict."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Analyse how dramatic irony and structure affect the audience's response in a play extract."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verbal",
+      "name": "Verbal Reasoning",
+      "summary": "A 11+/cognitive-reasoning progression. This is not a statutory UK or US curriculum subject, but it overlaps with vocabulary, grammar, comprehension and logic.",
+      "topics": [
+        {
+          "id": "verbal_synonyms_antonyms",
+          "strand": "Vocabulary",
+          "title": "Synonyms and antonyms",
+          "description": "Recognise close and opposite meanings, including precise vocabulary choices under time pressure.",
+          "alignment": "Related to English vocabulary standards and 11+ verbal reasoning familiarisation.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Choose the word closest in meaning to 'happy': joyful, tired, angry, cold."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Choose the opposite of 'ancient': old, modern, stone, early."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Which word is closest to 'cautious': careful, careless, quick, bright?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Choose the best antonym for 'expand': increase, shrink, explain, open."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Which word is nearest in meaning to 'ambiguous': unclear, obvious, loud, brief?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Choose the closest synonym for \"meticulous\": careless, precise, rapid, generous."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Choose the best antonym for \"conciliatory\": aggressive, helpful, careful, brief."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Which word is closest in meaning to \"equivocal\": ambiguous, equal, honest, emotional?"
+            }
+          ]
+        },
+        {
+          "id": "verbal_analogies",
+          "strand": "Relationships",
+          "title": "Analogies",
+          "description": "Identify relationships between word pairs and apply the same relationship to a new pair.",
+          "alignment": "Related to vocabulary, reasoning and common 11+ verbal reasoning item types.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Hand is to glove as foot is to what?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Bird is to nest as dog is to what?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Hot is to cold as victory is to what?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Author is to book as composer is to what?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Microscope is to tiny as telescope is to what?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Evaporation is to liquid as sublimation is to what?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Premise is to conclusion as evidence is to what?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Paradox is to contradiction as euphemism is to what relationship?"
+            }
+          ]
+        },
+        {
+          "id": "verbal_odd_one_out",
+          "strand": "Classification",
+          "title": "Odd one out and word groups",
+          "description": "Classify words by meaning, category, function or property and detect the item that does not fit.",
+          "alignment": "Related to word relationships, vocabulary precision and 11+ verbal reasoning.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which does not belong: red, blue, chair, green?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Which does not belong: salmon, trout, shark, robin?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Which word does not belong: triangle, square, circle, apple?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Which does not belong: sprint, jog, whisper, stroll?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Which does not belong: democracy, monarchy, geology, republic?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Which does not belong: allegory, metaphor, simile, denominator?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Which does not belong: hypothesis, evidence, conclusion, peninsula?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Which does not belong by function: nevertheless, however, therefore, mountain?"
+            }
+          ]
+        },
+        {
+          "id": "verbal_letter_sequences",
+          "strand": "Sequences",
+          "title": "Letter sequences",
+          "description": "Identify alphabetical patterns, skips and alternating rules.",
+          "alignment": "Related to pattern reasoning and common 11+ verbal reasoning sequence tasks.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "What comes next: A, B, C, ?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "What comes next: A, C, E, G, ?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "What comes next: Z, X, V, T, ?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "What comes next: B, E, D, G, F, I, ?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "What comes next: AZ, BY, CX, DW, ?"
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "What comes next: A, D, I, P, ?"
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "What comes next: AZ, CY, EX, GW, ?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "What comes next: B, E, J, Q, Z, ?"
+            }
+          ]
+        },
+        {
+          "id": "verbal_codes",
+          "strand": "Codes",
+          "title": "Letter and word codes",
+          "description": "Use substitution, position and rule-based codes to encode or decode words.",
+          "alignment": "Related to pattern reasoning, precision and 11+ verbal reasoning codes.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "If A=1 and B=2, what is C?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "If CAT is DBU by moving each letter forward one, write DOG in the same code."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "If A=26 and Z=1, what is B?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "If CODE becomes DPEF, decode UFTU."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "If TRAIN is coded as UQBMJ by alternating +1 and -1, code PLANE."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "If SMART becomes TNBSS by alternating +1 and -1 shifts, code LOGIC."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "A code reverses the word and then shifts each letter forward two places. Code REASON."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "If the code uses letter positions, vowels doubled and consonants reduced by 1, encode PLANE."
+            }
+          ]
+        },
+        {
+          "id": "verbal_cloze",
+          "strand": "Cloze",
+          "title": "Missing words and sentence completion",
+          "description": "Use grammar, syntax and meaning to fill gaps with the most fitting word.",
+          "alignment": "Related to English grammar, reading comprehension and 11+ verbal skills materials.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "The cat sat ___ the mat. Choose: on, blue, quickly."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "She was tired, ___ she finished the race. Choose: but, because, under."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "The scientist recorded the results ___ the experiment ended."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Choose the most precise word: The rain ___ against the window."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Complete the sentence with a word that preserves tone and logic."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Choose the word that best completes the sentence: The argument was persuasive ___ it lacked reliable data."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Complete a paragraph so the tone remains formal and the logical contrast is clear."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Choose the connective that best signals concession rather than cause, contrast or sequence."
+            }
+          ]
+        },
+        {
+          "id": "verbal_deduction",
+          "strand": "Logic",
+          "title": "Verbal deduction",
+          "description": "Draw conclusions from written clues and constraints.",
+          "alignment": "Related to reading evidence, mathematical reasoning and 11+ puzzle-style logic.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Tom is taller than Sam. Sam is taller than Lee. Who is shortest?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A is before B. C is after B. Which is first?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Three children have red, blue and green bags. Use clues to match each child."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "If all glips are flons, and no flons are red, can a glip be red?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Use five clues to order four people by age and justify the order."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Four pupils sit in a row. A is left of B, C is not at an end, and D is right of A. List a possible order."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "If all merans are tolins, some tolins are veks, and no veks are blue, what cannot be concluded?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Use six clues to determine a unique order of five competitors and identify the redundant clue."
+            }
+          ]
+        },
+        {
+          "id": "verbal_short_passage",
+          "strand": "Reading reasoning",
+          "title": "Short-passage verbal reasoning",
+          "description": "Extract precise meaning from short texts and answer logic or vocabulary questions.",
+          "alignment": "Related to English comprehension, vocabulary and 11+ English/verbal tests.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Read two sentences. What happened first?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Which word in the passage means 'small'?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Which statement must be true based on the paragraph?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Which conclusion is supported, but not directly stated?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Identify an assumption in a short argument."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Identify the assumption behind a short editorial paragraph."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Which sentence most weakens the writer's argument, and why?"
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Separate fact, inference and opinion in a dense nonfiction extract."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "non_verbal",
+      "name": "Non Verbal",
+      "summary": "A 11+/spatial-reasoning progression. This is not a statutory UK or US curriculum subject, but it overlaps with geometry, transformations and mathematical reasoning.",
+      "topics": [
+        {
+          "id": "nonverbal_shape_sequences",
+          "strand": "Pattern",
+          "title": "Shape sequences",
+          "description": "Identify changing visual rules involving shape, size, colour, number, position or orientation.",
+          "alignment": "Related to geometry, mathematical patterns and 11+ non-verbal reasoning familiarisation.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Circle, square, circle, square, ?. What comes next?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Triangle with 1 dot, 2 dots, 3 dots. How many dots next?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "A shape rotates a quarter turn each step. What is next?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Two rules change: shape alternates and dots increase by 2. What is next?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Infer the next figure when size, shading and rotation all change."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "A sequence changes shape, rotation and shading in a repeating cycle. Identify the next figure."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Find the missing figure when one attribute changes by position and another by number."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Infer the next figure in a sequence with three simultaneous rules and one distractor rule."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_odd_one_out",
+          "strand": "Classification",
+          "title": "Odd one out with visual properties",
+          "description": "Compare figures by attributes and identify the figure that breaks the shared rule.",
+          "alignment": "Related to geometry classification and common 11+ non-verbal reasoning item types.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which is different: three blue circles and one blue square?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Which is different: three shapes with 4 sides and one with 3 sides?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Which is different: figures with one line of symmetry except one?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Which is different: all rotate clockwise except one rotates anticlockwise?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Identify the figure that breaks a combined rule of shading, rotation and number."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Identify the only figure that does not preserve rotational symmetry after a quarter turn."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Find the odd figure when all others share a hidden relationship between dots, sides and shading."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Choose the odd figure where two visible rules fit but a third structural rule fails."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_matrices",
+          "strand": "Matrices",
+          "title": "Figure matrices",
+          "description": "Complete 2x2 or 3x3 grids by applying row and column rules.",
+          "alignment": "Related to visual logic, mathematical structure and 11+ non-verbal matrices.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "In a 2x2 grid, the top row is circle then square. Bottom left is circle. What is bottom right?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Rows change from empty to shaded. Columns change from small to large. What belongs in the missing box?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "In each row, the third figure combines the first two. Complete the row."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Apply one rule across rows and another down columns in a 3x3 matrix."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Complete a matrix where shape, shading and rotation each follow separate rules."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Complete a 3x3 matrix where each row combines shape and shading from the first two cells."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Complete a matrix where rows control rotation and columns control number of internal marks."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Complete a matrix with independent row, column and diagonal rules."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_rotation",
+          "strand": "Transformations",
+          "title": "Rotation",
+          "description": "Mentally rotate figures and recognise equivalent orientations.",
+          "alignment": "UK: position/direction and transformations. US: geometry and coordinate transformations.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which arrow shows a quarter turn clockwise from up?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A triangle points right. After a half turn, where does it point?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Match a shape to the same shape after a 90-degree rotation."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "A shape rotates 90 degrees clockwise each step. Choose the fourth figure."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Distinguish rotation from reflection in a complex figure."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Choose the same figure after a 180-degree rotation when internal arrows also rotate."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Identify whether a figure has been rotated 90 degrees clockwise or reflected vertically."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Track a compound transformation: rotate 90 degrees, reflect in a vertical line, then translate."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_reflection",
+          "strand": "Transformations",
+          "title": "Reflection and symmetry",
+          "description": "Recognise mirror images, lines of symmetry and reflected coordinate positions.",
+          "alignment": "UK: symmetry and reflection. US: geometry and coordinate plane.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which half makes a butterfly symmetrical?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "Draw the mirror image of a shape across a vertical line."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "How many lines of symmetry does a regular pentagon have?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Reflect point (3,2) in the y-axis."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Choose the image that is a reflection, not a rotation."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Complete the mirror image of a compound figure with asymmetric internal shading."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Choose the result of reflecting a coordinate shape in the line y = x."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Determine whether two figures are congruent by reflection, rotation, translation or no single transformation."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_nets_folding",
+          "strand": "Spatial",
+          "title": "Nets and folding",
+          "description": "Predict 3-D forms from 2-D nets and reason about opposite faces.",
+          "alignment": "UK: Year 6 nets and KS3 geometry. US: geometry and surface-area reasoning.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Which 2-D shape folds into a cube? Choose from simple nets."
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "A cube net has a star on one face. Which face will touch it?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Which of four nets cannot make a cube?"
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Find the face opposite the shaded face after folding a cube net."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Use a net with symbols to choose the correct folded cube."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "From a cube net with symbols, identify which two symbols will be on opposite faces."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Choose the only cube view that can be made from a given net with arrows on three faces."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Use two partial cube views to infer all possible opposite-face pairs."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_counting_shapes",
+          "strand": "Spatial",
+          "title": "Counting blocks and embedded shapes",
+          "description": "Count visible and hidden components, layers, intersections or embedded shapes.",
+          "alignment": "Related to geometry, area, volume and spatial visualisation.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "How many squares are in a 2 by 2 grid?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "How many small cubes make a 2 by 2 by 2 cube?"
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Count all triangles in a simple subdivided triangle."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "A block stack has hidden cubes. What is the minimum number of cubes?"
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Find the total number of cubes in a layered 3-D stack from front and side views."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Count all rectangles in a 3 by 4 grid."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Find the minimum number of cubes in a stack shown by front, side and top views."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Count all triangles in a layered geometric figure and explain a systematic counting method."
+            }
+          ]
+        },
+        {
+          "id": "nonverbal_shape_analogies",
+          "strand": "Relationships",
+          "title": "Shape analogies",
+          "description": "Transfer a visual relationship from one pair of figures to another.",
+          "alignment": "Related to mathematical structure, analogy and 11+ non-verbal reasoning.",
+          "samples": [
+            {
+              "age": 8,
+              "level": "Level 1",
+              "question": "Circle becomes square. Triangle becomes what if the rule is 'add one side'?"
+            },
+            {
+              "age": 9,
+              "level": "Level 2",
+              "question": "White shape becomes shaded. Apply the same change to a new shape."
+            },
+            {
+              "age": 10,
+              "level": "Level 3",
+              "question": "Small dotted triangle becomes large striped triangle. Apply to a circle."
+            },
+            {
+              "age": 11,
+              "level": "Level 4",
+              "question": "Figure A changes to B by rotation and shading. Apply both to C."
+            },
+            {
+              "age": 12,
+              "level": "Level 5",
+              "question": "Infer a compound transformation involving shape, number and position."
+            },
+            {
+              "age": 13,
+              "level": "Level 6",
+              "question": "Figure A changes to B by rotation, enlargement and colour inversion. Apply the same changes to C."
+            },
+            {
+              "age": 14,
+              "level": "Level 7",
+              "question": "Apply a transformation where outer shape follows one rule and inner marks follow another."
+            },
+            {
+              "age": 15,
+              "level": "Level 8",
+              "question": "Infer a visual analogy where position, count, shading and symmetry all change together."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
