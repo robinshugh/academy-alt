@@ -1,6 +1,6 @@
 # Supabase Connection Test
 
-This test only confirms that this machine can reach a Supabase project and that the publishable/anon key is accepted by the REST API.
+This test only confirms that this machine can reach a Supabase project and that the publishable/anon key is accepted by Supabase Auth.
 
 Do not use the `service_role` key or any `sb_secret_...` key for this browser/prototype test.
 
@@ -25,7 +25,9 @@ Expected success:
 
 ```text
 Supabase connection OK
-HTTP status: 200
+Auth health: OK (200)
+Auth settings: OK (200)
+Supabase connection OK
 ```
 
 ## What This Does Not Test Yet

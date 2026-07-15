@@ -18,39 +18,29 @@ def main():
         print("Set them in the current shell, then rerun this script.")
         return 2
 
-    endpoint = f"{url}/rest/v1/"
-    request = urllib.request.Request(
-        endpoint,
-        headers={
-            "apikey": key,
-            "Authorization": f"Bearer {key}",
-            "Accept": "application/openapi+json, application/json",
-        },
-        method="GET",
-    )
+    checks = [
+        ("Auth health", f"{url}/auth/v1/health", False),
+        ("Auth settings", f"{url}/auth/v1/settings", True),
+    ]
 
-    try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            body = response.read().decode("utf-8", errors="replace")
-            print("Supabase connection OK")
+    for label, endpoint, require_json_summary in checks:
+        ok, status, body_or_reason = request_json(endpoint, key)
+        if not ok:
+            print("Supabase connection failed")
+            print(f"Check: {label}")
             print(f"Endpoint: {endpoint}")
-            print(f"HTTP status: {response.status}")
-            print(f"Key prefix: {key[:14]}...")
-            print_summary(body)
-            return 0
-    except urllib.error.HTTPError as error:
-        body = error.read().decode("utf-8", errors="replace")
-        print("Supabase connection failed")
-        print(f"Endpoint: {endpoint}")
-        print(f"HTTP status: {error.code}")
-        print(f"Reason: {error.reason}")
-        print(body[:800])
-        return 1
-    except urllib.error.URLError as error:
-        print("Supabase connection failed")
-        print(f"Endpoint: {endpoint}")
-        print(f"Reason: {error.reason}")
-        return 1
+            print(f"HTTP status/reason: {status}")
+            print(str(body_or_reason)[:800])
+            return 1
+
+        print(f"{label}: OK ({status})")
+        if require_json_summary:
+            print_summary(body_or_reason)
+
+    print("Supabase connection OK")
+    print(f"Project URL: {url}")
+    print(f"Key prefix: {key[:14]}...")
+    return 0
 
 
 def normalize_url(value):
@@ -60,6 +50,28 @@ def normalize_url(value):
     return value
 
 
+def request_json(endpoint, key):
+    request = urllib.request.Request(
+        endpoint,
+        headers={
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Accept": "application/json",
+        },
+        method="GET",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = response.read().decode("utf-8", errors="replace")
+            return True, response.status, body
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        return False, error.code, body
+    except urllib.error.URLError as error:
+        return False, "network error", error.reason
+
+
 def print_summary(body):
     try:
         payload = json.loads(body)
@@ -67,14 +79,12 @@ def print_summary(body):
         print(f"Response bytes: {len(body.encode('utf-8'))}")
         return
 
-    title = payload.get("info", {}).get("title")
-    version = payload.get("info", {}).get("version")
-    paths = payload.get("paths", {})
-    if title:
-        print(f"API title: {title}")
-    if version:
-        print(f"API version: {version}")
-    print(f"REST paths visible: {len(paths)}")
+    external = payload.get("external", {})
+    if external:
+        enabled = sorted(provider for provider, active in external.items() if active)
+        print(f"Auth providers enabled: {', '.join(enabled) if enabled else 'none'}")
+    if "disable_signup" in payload:
+        print(f"Signup disabled: {payload['disable_signup']}")
 
 
 if __name__ == "__main__":
