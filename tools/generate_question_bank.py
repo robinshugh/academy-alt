@@ -1510,6 +1510,7 @@ def statistics(subject, topic, age, index, rng):
         labels = ["Mon", "Tue", "Wed", "Thu"]
         values = [rng.randint(8, 30) for _ in labels]
         high = max(range(len(values)), key=values.__getitem__)
+        low = min(range(len(values)), key=values.__getitem__)
         stimulus = {
             "type": "bar_chart",
             "title": "Books Read",
@@ -1517,6 +1518,23 @@ def statistics(subject, topic, age, index, rng):
             "bars": [{"label": label, "value": values[i]} for i, label in enumerate(labels)],
             "alt": "Bar chart showing books read across four days.",
         }
+        if age >= 15:
+            percent = round(values[high] / sum(values) * 100)
+            return numeric_question(
+                f"Use the bar chart. To the nearest whole percent, what percentage of all books were read on {labels[high]}?",
+                percent,
+                f"There were {sum(values)} books in total. {values[high]} divided by {sum(values)} is about {percent}%.",
+                stimulus=stimulus,
+                expected_seconds=target_seconds(32, age, cap=7),
+            )
+        if age >= 13:
+            return numeric_question(
+                "Use the bar chart. What is the difference between the highest and lowest daily totals?",
+                values[high] - values[low],
+                f"The highest value is {values[high]} and the lowest is {values[low]}, so the difference is {values[high] - values[low]}.",
+                stimulus=stimulus,
+                expected_seconds=target_seconds(24, age, cap=6),
+            )
         return choice_question(
             "Use the bar chart. Which day had the most books read?",
             labels[high],
@@ -1527,6 +1545,16 @@ def statistics(subject, topic, age, index, rng):
             expected_seconds=target_seconds(20, age, cap=5),
         )
     if mode == 1:
+        if age >= 13:
+            mean = rng.randint(12, 28)
+            known_values = [mean + offset for offset in rng.sample([-5, -3, -1, 2, 4, 6], 4)]
+            missing = mean * 5 - sum(known_values)
+            return numeric_question(
+                f"Five values have a mean of {mean}. Four values are {', '.join(map(str, known_values))}. What is the missing value?",
+                missing,
+                f"Five values with mean {mean} have total {mean * 5}. The known values total {sum(known_values)}, so the missing value is {missing}.",
+                expected_seconds=target_seconds(34, age, cap=7),
+            )
         mean = rng.randint(6, 25)
         offsets = [-2, -1, 0, 1, 2]
         rng.shuffle(offsets)
@@ -1538,6 +1566,20 @@ def statistics(subject, topic, age, index, rng):
             expected_seconds=target_seconds(28, age, cap=6),
         )
     if mode == 2:
+        if age >= 13:
+            low = rng.randint(8, 20)
+            gaps = sorted(rng.sample(range(2, 18), 5))
+            values = sorted([low + gap for gap in gaps] + [low])
+            lower_half = values[:3]
+            upper_half = values[3:]
+            q1 = lower_half[1]
+            q3 = upper_half[1]
+            return numeric_question(
+                f"Find the interquartile range of these ordered values: {', '.join(map(str, values))}.",
+                q3 - q1,
+                f"Q1 is {q1} and Q3 is {q3}, so the interquartile range is {q3 - q1}.",
+                expected_seconds=target_seconds(30, age, cap=7),
+            )
         values = [rng.randint(10, 80) for _ in range(6)]
         return numeric_question(
             f"Find the range of these values: {', '.join(map(str, values))}.",
@@ -1549,6 +1591,29 @@ def statistics(subject, topic, age, index, rng):
         red = rng.randint(2, 8)
         blue = rng.choice([value for value in range(2, 9) if value != red])
         total = red + blue
+        if age >= 15:
+            answer_num = 2 * red * blue
+            answer_den = total * total
+            sn, sd = simplify_fraction(answer_num, answer_den)
+            return choice_question(
+                f"A bag has {red} red and {blue} blue counters. A counter is picked, replaced, then another is picked. What is the probability of getting one red and one blue in any order?",
+                fraction_text(sn, sd),
+                [fraction_text(red * blue, answer_den), fraction_text(red, total), fraction_text(blue, total)],
+                f"There are two successful orders, red then blue or blue then red, so the probability is 2 x {red}/{total} x {blue}/{total} = {fraction_text(sn, sd)}.",
+                rng,
+                expected_seconds=target_seconds(36, age, cap=8),
+            )
+        if age >= 13:
+            not_red = blue
+            sn, sd = simplify_fraction(not_red, total)
+            return choice_question(
+                f"A bag has {red} red counters and {blue} blue counters. What is the probability of not picking a red counter?",
+                fraction_text(sn, sd),
+                [fraction_text(red, total), fraction_text(not_red, red), fraction_text(total, not_red)],
+                f"Not red means blue, so the probability is {not_red}/{total}, which simplifies to {fraction_text(sn, sd)}.",
+                rng,
+                expected_seconds=target_seconds(22, age, cap=6),
+            )
         return choice_question(
             f"A bag has {red} red counters and {blue} blue counters. What is the probability of picking a red counter?",
             fraction_text(red, total),
@@ -1558,6 +1623,17 @@ def statistics(subject, topic, age, index, rng):
             expected_seconds=target_seconds(20, age, cap=5),
         )
     if mode == 4:
+        if age >= 13:
+            median = rng.randint(20, 45)
+            lower = sorted([median - rng.randint(3, 12), median - rng.randint(1, 8)])
+            upper = sorted([median + rng.randint(1, 8), median + rng.randint(3, 12)])
+            values = lower + ["x"] + upper
+            return numeric_question(
+                f"The ordered data set is {', '.join(map(str, values))}. If the median is {median}, what is x?",
+                median,
+                f"With five ordered values, the median is the middle value, so x = {median}.",
+                expected_seconds=target_seconds(22, age, cap=6),
+            )
         values = sorted([rng.randint(5, 60) for _ in range(5)])
         median = values[2]
         return numeric_question(
@@ -1579,6 +1655,15 @@ def statistics(subject, topic, age, index, rng):
             "bars": [{"label": label, "value": values[i]} for i, label in enumerate(labels)],
             "alt": "Bar chart showing votes for four choices.",
         }
+        if age >= 13:
+            target_percent = round(target_value / total * 100)
+            return numeric_question(
+                f"Use the bar chart. To the nearest whole percent, what percentage of all votes went to choice {target_label}?",
+                target_percent,
+                f"Choice {target_label} has {target_value} out of {total} votes, which is about {target_percent}%.",
+                stimulus=stimulus,
+                expected_seconds=target_seconds(32, age, cap=7),
+            )
         return numeric_question(
             f"Use the bar chart. How many more votes are there for all choices combined than for choice {target_label}?",
             total - target_value,
@@ -1592,6 +1677,32 @@ def statistics(subject, topic, age, index, rng):
         girls_yes = rng.randint(4, 15)
         girls_no = rng.randint(3, 12)
         total_yes = boys_yes + girls_yes
+        if age >= 15:
+            boys_total = boys_yes + boys_no
+            girls_total = girls_yes + girls_no
+            boys_percent = round(boys_yes / boys_total * 100)
+            girls_percent = round(girls_yes / girls_total * 100)
+            if boys_percent == girls_percent:
+                girls_yes += 1
+                girls_total = girls_yes + girls_no
+                girls_percent = round(girls_yes / girls_total * 100)
+            answer = abs(girls_percent - boys_percent)
+            return numeric_question(
+                f"In a survey, boys: yes {boys_yes}, no {boys_no}; girls: yes {girls_yes}, no {girls_no}. To the nearest whole percentage point, how much larger is the higher yes-rate than the lower yes-rate?",
+                answer,
+                f"Boys' yes-rate is about {boys_percent}%; girls' yes-rate is about {girls_percent}%. The difference is {answer} percentage point(s).",
+                expected_seconds=target_seconds(38, age, cap=8),
+            )
+        if age >= 13:
+            sn, sd = simplify_fraction(girls_yes, total_yes)
+            return choice_question(
+                f"In a survey, boys: yes {boys_yes}, no {boys_no}; girls: yes {girls_yes}, no {girls_no}. A pupil who answered yes is chosen at random. What is the probability the pupil is a girl?",
+                fraction_text(sn, sd),
+                [fraction_text(boys_yes, total_yes), fraction_text(girls_yes, girls_yes + girls_no), fraction_text(total_yes, boys_yes + boys_no + girls_yes + girls_no)],
+                f"There are {total_yes} yes answers, of which {girls_yes} are from girls. The probability is {girls_yes}/{total_yes}, simplified to {fraction_text(sn, sd)}.",
+                rng,
+                expected_seconds=target_seconds(34, age, cap=7),
+            )
         return numeric_question(
             f"In a survey, boys: yes {boys_yes}, no {boys_no}; girls: yes {girls_yes}, no {girls_no}. How many pupils answered yes?",
             total_yes,
@@ -1629,6 +1740,17 @@ def statistics(subject, topic, age, index, rng):
             f"Use {red}/{total} x {red - 1}/{total - 1}, which simplifies to {fraction_text(sn, sd)}.",
             rng,
             expected_seconds=target_seconds(34, age, cap=7),
+        )
+    if age >= 13:
+        gradient = rng.randint(3, 7)
+        intercept = rng.randint(28, 48)
+        hours = rng.randint(4, 9)
+        estimate = gradient * hours + intercept
+        return numeric_question(
+            f"A line of best fit for a scatter graph is score = {gradient} x revision_hours + {intercept}. Estimate the score for {hours} hours of revision.",
+            estimate,
+            f"Substitute {hours}: {gradient} x {hours} + {intercept} = {estimate}.",
+            expected_seconds=target_seconds(28, age, cap=6),
         )
     return choice_question(
         "A scatter graph shows that as revision time increases, test score usually increases. What type of correlation is this?",
