@@ -145,37 +145,37 @@ def render_student(bank, skill_map, user):
         return
 
     st.session_state.quiz_mode = "reading"
-    reading_row = next(
-        (row for row in matrix if row["skillId"] == "english_reading_comprehension"),
-        {"attempts": 0, "mastery": 0, "targetDifficulty": 1, "targetAge": 8},
-    )
 
     st.subheader(f"{user['display_name']}'s Reading")
     st.write("One article with linked comprehension questions, selected from the latest reading ability profile.")
 
-    metric_cols = st.columns(4)
-    metric_cols[0].metric("Reading attempts", reading_row["attempts"])
-    metric_cols[1].metric("Reading mastery", f"{reading_row['mastery']}%" if reading_row["attempts"] else "-")
-    metric_cols[2].metric("Next level", format_level(reading_row["targetDifficulty"]))
-    metric_cols[3].metric("Next age band", f"Age {reading_row['targetAge']}")
-
     if st.session_state.completed_session_id:
         render_completed_reading_summary(st.session_state.completed_session_id)
+        action_cols = st.columns(2)
+        if action_cols[0].button("One More Reading", type="primary"):
+            begin_reading_task(bank, matrix, user)
+        if action_cols[1].button("Back to Main Menu"):
+            st.session_state.completed_session_id = None
+            reset_quiz()
+            st.rerun()
+        return
 
     if st.button("Start Reading Task", type="primary"):
-        questions = choose_questions(bank, matrix, user["user_id"], "reading", st.session_state.subject)
-        if not questions:
-            st.error("No reading articles are available.")
-        else:
-            st.session_state.active_questions = questions
-            st.session_state.active_index = 0
-            st.session_state.question_started_at = time.time()
-            st.session_state.session_done = False
-            st.session_state.completed_session_id = None
-            st.rerun()
+        begin_reading_task(bank, matrix, user)
 
-    with st.expander("Current ability matrix", expanded=False):
-        render_matrix_table(matrix)
+
+def begin_reading_task(bank, matrix, user):
+    questions = choose_questions(bank, matrix, user["user_id"], "reading", st.session_state.subject)
+    if not questions:
+        st.error("No reading articles are available.")
+        return
+
+    st.session_state.active_questions = questions
+    st.session_state.active_index = 0
+    st.session_state.question_started_at = time.time()
+    st.session_state.session_done = False
+    st.session_state.completed_session_id = None
+    st.rerun()
 
 
 def render_active_quiz(bank, skill_map, user):
@@ -212,14 +212,8 @@ def render_active_quiz(bank, skill_map, user):
 def render_active_reading_sheet(user):
     questions = st.session_state.active_questions
     article_stimulus = next((question.get("stimulus") for question in questions if question.get("stimulus")), None)
-    total_expected = sum(get_reading_question_expected_seconds(question, index == 0) for index, question in enumerate(questions))
-    avg_level = round(average([question.get("difficulty", 1) for question in questions]))
 
-    top = st.columns([1, 1, 1, 1])
-    top[0].metric("Questions", len(questions))
-    top[1].metric("Target time", format_seconds(total_expected))
-    top[2].metric("Level", format_level(avg_level))
-    if top[3].button("Back to Main Page"):
+    if st.button("Back to Main Page"):
         reset_quiz()
         st.rerun()
 
@@ -230,12 +224,8 @@ def render_active_reading_sheet(user):
         answers = {}
         confidences = {}
         for index, question in enumerate(questions):
-            expected_seconds = get_reading_question_expected_seconds(question, index == 0)
             st.markdown(f"**Q{index + 1}. {question['prompt']}**")
-            st.caption(
-                f"{question_role_label(question.get('question_role'))} | "
-                f"Target {format_seconds(expected_seconds)} | {format_level(question.get('difficulty', 1))}"
-            )
+            st.caption(question_role_label(question.get("question_role")))
             answers[question["id"]] = st.radio(
                 "Answer",
                 options=[choice["id"] for choice in question.get("choices", [])],
