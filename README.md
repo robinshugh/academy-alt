@@ -56,7 +56,7 @@ http://localhost:5173
 
 ## Content
 
-- Generated question bank: 6,020 questions.
+- Generated question bank: 3,938 retained questions from 6,020 deterministic templates.
 - Coverage: maths, English language, verbal reasoning, non-verbal reasoning, and reading comprehension.
 - Age bands: 8 to 15.
 - Format files live under `content/`.
@@ -64,6 +64,19 @@ http://localhost:5173
 - `target_age` is the main question suitability scale. The legacy `difficulty` field is kept as an internal compatibility value where `difficulty = target_age - 7`.
 
 ## Audit Question Ages
+
+The question bank uses a local rule-based age audit during generation. This does not use tokens:
+
+```powershell
+python -B tools\generate_question_bank.py
+python -B tools\rule_based_age_audit.py --only-changed
+```
+
+The local report is written to:
+
+```text
+reports/rule-based-age-audit.csv
+```
 
 To ask ChatGPT/OpenAI to review suitable ages and produce a CSV report:
 

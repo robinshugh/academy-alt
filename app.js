@@ -508,8 +508,12 @@ function scoreQuestionForAbility(question, row, attemptsByQuestion, options = {}
   const targetDifficulty = clamp(row.targetDifficulty + (options.difficultyBoost || 0), row.minDifficulty, row.maxDifficulty);
   const targetDistance = Math.abs(difficulty - targetDifficulty);
   const attemptPenalty = (attemptsByQuestion.get(question.id) || 0) * 45;
-  const ageDistance = Math.abs(Number(question.age || row.targetAge) - row.targetAge);
+  const ageDistance = Math.abs(getQuestionTargetAge(question, row.targetAge) - row.targetAge);
   return targetDistance * 18 + ageDistance * 3 + attemptPenalty;
+}
+
+function getQuestionTargetAge(question, fallback = 8) {
+  return Number(question?.target_age || question?.age || fallback);
 }
 
 function selectReviewQuestions(matrix, count, attemptsByQuestion) {
@@ -575,7 +579,7 @@ function selectReadingArticleQuestions(matrix, attemptsByQuestion) {
       const targetQuestionCount = getReadingArticleQuestionCount(orderedQuestions, averageDifficulty);
       const attempts = orderedQuestions.reduce((total, question) => total + (attemptsByQuestion.get(question.id) || 0), 0);
       const targetDistance = Math.abs(averageDifficulty - readingRow.targetDifficulty);
-      const ageDistance = Math.abs(Number(firstQuestion.age || readingRow.targetAge) - readingRow.targetAge);
+      const ageDistance = Math.abs(getQuestionTargetAge(firstQuestion, readingRow.targetAge) - readingRow.targetAge);
       return {
         articleId,
         questions: orderedQuestions.slice(0, targetQuestionCount),
@@ -2171,6 +2175,7 @@ function renderCurriculumQuestionBrowser(topic, selectedAge, questions, question
 function renderCurriculumQuestionCard(question, questionIndex, questionCount) {
   const isFirst = questionIndex <= 0;
   const isLast = questionIndex >= questionCount - 1;
+  const targetAge = getQuestionTargetAge(question);
   const stimulusHtml = question.stimulus
     ? `<div class="curriculum-stimulus">${renderStimulusMarkup(question.stimulus)}</div>`
     : "";
@@ -2180,7 +2185,7 @@ function renderCurriculumQuestionCard(question, questionIndex, questionCount) {
       <div class="curriculum-question-head">
         <div>
           <span class="question-count">Question ${questionIndex + 1} of ${questionCount}</span>
-          <p>${escapeHtml(question.grade_label || `Age ${question.age}`)} - Target time ${escapeHtml(formatSeconds(question.expected_seconds))}</p>
+          <p>Age ${escapeHtml(targetAge)} - Target time ${escapeHtml(formatSeconds(question.expected_seconds))}</p>
         </div>
         <div class="question-nav">
           <button class="secondary-button" type="button" data-question-nav="previous" ${isFirst ? "disabled" : ""}>Previous</button>
@@ -2220,7 +2225,7 @@ function getCurriculumAgeOptions(topic) {
   const sampleAges = (topic.samples || []).map((sample) => Number(sample.age)).filter(Boolean);
   const bankAges = (state.content?.questions || [])
     .filter((question) => question.topic_id === topic.id)
-    .map((question) => Number(question.age))
+    .map((question) => getQuestionTargetAge(question))
     .filter(Boolean);
   return [...new Set([...sampleAges, ...bankAges])].sort((a, b) => a - b);
 }
@@ -2235,7 +2240,7 @@ function getSelectedCurriculumAge(topic) {
 
 function getCurriculumQuestions(topicId, age) {
   return (state.content?.questions || [])
-    .filter((question) => question.topic_id === topicId && Number(question.age) === Number(age))
+    .filter((question) => question.topic_id === topicId && getQuestionTargetAge(question) === Number(age))
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
@@ -2653,7 +2658,7 @@ function computeAbilityMatrix(userId) {
 function buildAbilityRow(skill, responses, questions) {
   const attempts = responses.length;
   const difficulties = questions.map((question) => Number(question.difficulty || 1));
-  const ages = questions.map((question) => Number(question.age || 8)).filter(Boolean);
+  const ages = questions.map((question) => getQuestionTargetAge(question)).filter(Boolean);
   const minDifficulty = difficulties.length ? Math.min(...difficulties) : 1;
   const maxDifficulty = difficulties.length ? Math.max(...difficulties) : 8;
   const minAge = ages.length ? Math.min(...ages) : 8;
@@ -2779,9 +2784,9 @@ function calculateTargetAge(questions, targetDifficulty, minAge, maxAge) {
     .sort((a, b) =>
       Math.abs(Number(a.difficulty || targetDifficulty) - targetDifficulty)
       - Math.abs(Number(b.difficulty || targetDifficulty) - targetDifficulty)
-      || Number(a.age || minAge) - Number(b.age || minAge)
+      || getQuestionTargetAge(a, minAge) - getQuestionTargetAge(b, minAge)
     )[0];
-  return clamp(Number(closest?.age || minAge), minAge, maxAge);
+  return clamp(getQuestionTargetAge(closest, minAge), minAge, maxAge);
 }
 
 function getPracticePriority(stats) {

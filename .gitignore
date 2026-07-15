@@ -24,5 +24,6 @@ env/
 Thumbs.db
 
 # Local exports and temporary files
+reports/
 *.log
 *.tmp

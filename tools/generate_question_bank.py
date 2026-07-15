@@ -2,6 +2,8 @@ import json
 import random
 from pathlib import Path
 
+from question_age_rules import apply_rule_based_age_audit
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CURRICULUM_PATH = ROOT / "content" / "curriculum-browser.json"
@@ -378,8 +380,12 @@ def main():
                     else:
                         questions.append(normalise_question(subject, topic, age, index, question))
 
+    generated_question_count = len(questions)
+    age_audit = apply_rule_based_age_audit(questions)
+    questions, deduplication = deduplicate_questions(questions)
+
     bank = {
-        "version": "0.4.0",
+        "version": "0.4.1",
         "curriculum": {
             "country": "UK and US",
             "basis": [
@@ -389,8 +395,11 @@ def main():
             ],
             "age_range": AGES,
             "questions_per_topic_per_age": QUESTIONS_PER_TOPIC_PER_AGE,
+            "template_questions_generated": generated_question_count,
             "total_questions": len(questions),
             "generation": "deterministic_template_bank",
+            "age_audit": age_audit,
+            "deduplication": deduplication,
         },
         "questions": questions,
     }
@@ -398,6 +407,8 @@ def main():
     write_json(QUESTION_BANK_PATH, bank)
     write_json(SKILL_MAP_PATH, build_skill_map(curriculum))
     print(f"Wrote {len(questions)} questions to {QUESTION_BANK_PATH}")
+    print(f"Rule-based age audit changed {age_audit['changed_target_age_count']} target ages")
+    print(f"Removed {deduplication['removed_duplicate_count']} duplicate target-age questions")
     print(f"Wrote skill map to {SKILL_MAP_PATH}")
 
 
@@ -406,6 +417,49 @@ def raw_question_signature(question):
     stimulus_text = json.dumps(question.get("stimulus"), sort_keys=True, ensure_ascii=False)
     answer_text = json.dumps(question.get("answer"), sort_keys=True, ensure_ascii=False)
     return question.get("prompt"), choice_text, stimulus_text, answer_text
+
+
+def deduplicate_questions(questions):
+    grouped = {}
+    for question in questions:
+        signature = audited_question_signature(question)
+        current = grouped.get(signature)
+        if current is None or duplicate_keep_score(question) < duplicate_keep_score(current):
+            grouped[signature] = question
+
+    retained = sorted(
+        grouped.values(),
+        key=lambda question: (
+            question["subject"],
+            question["topic_id"],
+            question["target_age"],
+            question["id"],
+        ),
+    )
+    return retained, {
+        "method": "same_topic_target_age_prompt_choices_stimulus_answer_keep_nearest_original_age",
+        "removed_duplicate_count": len(questions) - len(retained),
+        "retained_questions": len(retained),
+    }
+
+
+def audited_question_signature(question):
+    return (
+        question.get("topic_id"),
+        question.get("target_age"),
+        question.get("question_type"),
+        question.get("prompt"),
+        tuple(sorted(choice.get("text", "") for choice in question.get("choices", []))),
+        json.dumps(question.get("stimulus"), sort_keys=True, ensure_ascii=False),
+        json.dumps(question.get("answer"), sort_keys=True, ensure_ascii=False),
+    )
+
+
+def duplicate_keep_score(question):
+    return (
+        abs(int(question.get("age", 8)) - int(question.get("target_age", question.get("age", 8)))),
+        question.get("id", ""),
+    )
 
 
 def read_json(path):

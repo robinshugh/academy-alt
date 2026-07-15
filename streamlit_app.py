@@ -983,7 +983,7 @@ def simulate_student_profile(bank, skill_map, user_id):
             questions,
             key=lambda question: (
                 abs(question.get("difficulty", target_level) - target_level),
-                abs(question.get("age", target_age) - target_age),
+                abs(question_target_age(question, target_age) - target_age),
                 question["id"],
             ),
         )
@@ -1176,7 +1176,7 @@ def select_reading_article(bank, matrix, attempts_by_question):
         title = (questions[0].get("stimulus") or {}).get("title", "")
         attempts = sum(attempts_by_question[question["id"]] for question in questions)
         avg_level = average([question.get("difficulty", 1) for question in questions])
-        age_distance = abs(questions[0].get("age", 8) - reading_row["targetAge"])
+        age_distance = abs(question_target_age(questions[0], 8) - reading_row["targetAge"])
         level_distance = abs(avg_level - reading_row["targetDifficulty"])
         question_count = reading_article_question_count(questions, avg_level)
         candidates.append((
@@ -1229,7 +1229,7 @@ def pick_question(bank, row, attempts_by_question, selected_ids, boost):
         key=lambda question: (
             attempts_by_question[question["id"]] * 80
             + abs(question.get("difficulty", target) - target) * 18
-            + abs(question.get("age", row["targetAge"]) - row["targetAge"]) * 3,
+            + abs(question_target_age(question, row["targetAge"]) - row["targetAge"]) * 3,
             question["id"],
         ),
     )[0]
@@ -1264,7 +1264,7 @@ def compute_ability_matrix(bank, skill_map, user_id):
 
 def build_ability_row(skill, subject, responses, questions, default_age):
     difficulties = [question.get("difficulty", 1) for question in questions]
-    ages = [question.get("age", 8) for question in questions]
+    ages = [question_target_age(question, 8) for question in questions]
     min_level = min(difficulties or [1])
     max_level = max(difficulties or [8])
     min_age = min(ages or [8])
@@ -1427,9 +1427,13 @@ def closest_age(questions, target, min_age, max_age):
         return min_age
     question = sorted(
         questions,
-        key=lambda item: (abs(item.get("difficulty", target) - target), item.get("age", min_age)),
+        key=lambda item: (abs(item.get("difficulty", target) - target), question_target_age(item, min_age)),
     )[0]
-    return clamp(question.get("age", min_age), min_age, max_age)
+    return clamp(question_target_age(question, min_age), min_age, max_age)
+
+
+def question_target_age(question, fallback=8):
+    return int(question.get("target_age") or question.get("age") or fallback)
 
 
 def reset_quiz():
