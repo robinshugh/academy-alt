@@ -231,8 +231,11 @@ def render_active_quiz(bank, skill_map, user):
     index = st.session_state.active_index
     question = questions[index]
     expected_seconds = active_expected_seconds(question, questions, index, st.session_state.quiz_mode)
+    remaining = max(0, len(questions) - index - 1)
 
-    if st.button("Back to Main Page"):
+    header_cols = st.columns([3, 1])
+    header_cols[0].markdown(f"**Question {index + 1} of {len(questions)}** - {remaining} remaining")
+    if header_cols[1].button("Back to Main Page", use_container_width=True):
         if st.session_state.quiz_mode == "subject":
             save_subject_session(user, questions, status="paused")
         reset_quiz()
@@ -243,12 +246,20 @@ def render_active_quiz(bank, skill_map, user):
 
     selected = render_answer_input(question, f"answer-{question['id']}-{index}")
     st.caption("Choose confidence to submit")
-    confidence_cols = st.columns(4)
+    confidence_cols = st.columns(4, gap="small")
     for confidence, col in zip([1, 2, 3, 4], confidence_cols):
-        if col.button(CONFIDENCE_LABELS[confidence], key=f"confidence-{question['id']}-{index}-{confidence}"):
+        if col.button(
+            CONFIDENCE_LABELS[confidence],
+            key=f"confidence-{question['id']}-{index}-{confidence}",
+            use_container_width=True,
+        ):
             submit_current_answer(user, question, selected, confidence, expected_seconds, index, questions)
 
-    if st.button("End practice"):
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+    end_cols = st.columns([3, 1])
+    if end_cols[1].button("End Practice", use_container_width=True):
+        if st.session_state.quiz_mode == "subject":
+            save_subject_session(user, questions, status="paused")
         reset_quiz()
         st.rerun()
 
@@ -257,7 +268,9 @@ def render_active_reading_sheet(user):
     questions = st.session_state.active_questions
     article_stimulus = next((question.get("stimulus") for question in questions if question.get("stimulus")), None)
 
-    if st.button("Back to Main Page"):
+    header_cols = st.columns([3, 1])
+    header_cols[0].markdown(f"**Total questions: {len(questions)}**")
+    if header_cols[1].button("Back to Main Page", use_container_width=True):
         reset_quiz()
         st.rerun()
 
