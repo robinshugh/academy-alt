@@ -579,7 +579,8 @@ def correct_answer_text(question):
 
 
 def get_article_id(question):
-    return question.get("article_id") or question.get("stimulus", {}).get("article_id")
+    stimulus = question.get("stimulus") or {}
+    return question.get("article_id") or stimulus.get("article_id")
 
 
 def confidence_calibration(response):
