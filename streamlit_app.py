@@ -73,8 +73,10 @@ def init_state():
         "alerts": [],
         "active_questions": [],
         "active_index": 0,
+        "active_session_id": None,
+        "active_session_started_at": None,
         "question_started_at": None,
-        "quiz_mode": "today",
+        "quiz_mode": "reading",
         "subject": "maths",
         "session_done": False,
         "completed_session_id": None,
@@ -142,15 +144,16 @@ def render_student(bank, skill_map, user):
         render_active_quiz(bank, skill_map, user)
         return
 
-    st.session_state.quiz_mode = "reading"
-
-    st.subheader(f"{user['display_name']}'s Reading")
-    st.write("One article with linked comprehension questions, selected from the latest reading ability profile.")
+    st.subheader(f"{user['display_name']}'s Practice")
 
     if st.session_state.completed_session_id:
-        render_completed_reading_summary(st.session_state.completed_session_id)
+        completed_session = get_session(st.session_state.completed_session_id)
+        render_completed_session_summary(st.session_state.completed_session_id)
         action_cols = st.columns(2)
-        if action_cols[0].button("One More Reading", type="primary"):
+        if completed_session and completed_session.get("mode") == "subject":
+            if action_cols[0].button("One More Subject Quiz", type="primary"):
+                begin_subject_quiz(bank, matrix, user)
+        elif action_cols[0].button("One More Reading", type="primary"):
             begin_reading_task(bank, matrix, user)
         if action_cols[1].button("Back to Main Menu"):
             st.session_state.completed_session_id = None
@@ -158,8 +161,32 @@ def render_student(bank, skill_map, user):
             st.rerun()
         return
 
-    if st.button("Start Reading Task", type="primary"):
+    mode = st.radio(
+        "Task",
+        options=["reading", "subject"],
+        format_func=lambda value: "Reading" if value == "reading" else "Subject Quiz",
+        horizontal=True,
+        index=["reading", "subject"].index(st.session_state.quiz_mode)
+        if st.session_state.quiz_mode in {"reading", "subject"}
+        else 0,
+    )
+    st.session_state.quiz_mode = mode
+
+    if mode == "reading":
+        st.write("One article with linked comprehension questions, selected from the latest reading ability profile.")
+    else:
+        st.write("Ten questions from one subject, selected from the latest ability profile.")
+        st.session_state.subject = st.selectbox(
+            "Subject",
+            options=["maths", "english", "verbal", "non_verbal"],
+            format_func=subject_label,
+            index=["maths", "english", "verbal", "non_verbal"].index(st.session_state.subject),
+        )
+
+    if mode == "reading" and st.button("Start Reading Task", type="primary"):
         begin_reading_task(bank, matrix, user)
+    elif mode == "subject" and st.button("Start Subject Quiz", type="primary"):
+        begin_subject_quiz(bank, matrix, user)
 
 
 def begin_reading_task(bank, matrix, user):
@@ -170,6 +197,25 @@ def begin_reading_task(bank, matrix, user):
 
     st.session_state.active_questions = questions
     st.session_state.active_index = 0
+    st.session_state.active_session_id = None
+    st.session_state.active_session_started_at = None
+    st.session_state.question_started_at = time.time()
+    st.session_state.session_done = False
+    st.session_state.completed_session_id = None
+    st.rerun()
+
+
+def begin_subject_quiz(bank, matrix, user):
+    questions = choose_questions(bank, matrix, user["user_id"], "subject", st.session_state.subject)
+    if not questions:
+        st.error("No questions are available for this subject.")
+        return
+
+    st.session_state.quiz_mode = "subject"
+    st.session_state.active_questions = questions
+    st.session_state.active_index = 0
+    st.session_state.active_session_id = create_id("session")
+    st.session_state.active_session_started_at = iso_now()
     st.session_state.question_started_at = time.time()
     st.session_state.session_done = False
     st.session_state.completed_session_id = None
@@ -186,12 +232,12 @@ def render_active_quiz(bank, skill_map, user):
     question = questions[index]
     expected_seconds = active_expected_seconds(question, questions, index, st.session_state.quiz_mode)
 
-    top = st.columns([1, 1, 1])
-    top[0].metric("Question", f"{index + 1} / {len(questions)}")
-    top[1].metric("Target", format_seconds(expected_seconds))
-    top[2].metric("Level", format_level(question.get("difficulty", 1)))
+    if st.button("Back to Main Page"):
+        if st.session_state.quiz_mode == "subject":
+            save_subject_session(user, questions, status="paused")
+        reset_quiz()
+        st.rerun()
 
-    st.caption(f"{subject_label(question['subject'])} | {question['topic_title']}")
     render_stimulus(question.get("stimulus"))
     st.markdown(f"### {question['prompt']}")
 
@@ -281,12 +327,19 @@ def submit_current_answer(user, question, selected, confidence, expected_seconds
         st.error("Choose or type an answer before tapping your confidence.")
         return
 
-    save_response(user, question, selected, confidence, expected_seconds)
+    save_response(
+        user,
+        question,
+        selected,
+        confidence,
+        expected_seconds,
+        session_id=st.session_state.active_session_id,
+    )
     if index + 1 >= len(questions):
+        session = save_subject_session(user, questions, status="completed")
         st.session_state.session_done = True
-        st.session_state.active_questions = []
-        st.session_state.active_index = 0
-        st.session_state.question_started_at = None
+        reset_quiz()
+        st.session_state.completed_session_id = session["id"] if session else None
     else:
         st.session_state.active_index += 1
         st.session_state.question_started_at = time.time()
@@ -679,13 +732,46 @@ def save_reading_sheet(user, questions, answers, confidences, elapsed_total):
     return session
 
 
-def render_completed_reading_summary(session_id):
+def save_subject_session(user, questions, status="completed"):
+    session_id = st.session_state.active_session_id
+    if not session_id:
+        return None
+
+    responses = [
+        response
+        for response in st.session_state.responses
+        if response.get("sessionId") == session_id
+    ]
+    if not responses:
+        return None
+
+    completed_at = iso_now()
+    session = {
+        "id": session_id,
+        "userId": user["user_id"],
+        "mode": "subject",
+        "subject": st.session_state.subject,
+        "label": f"{subject_label(st.session_state.subject)} Quiz",
+        "status": status,
+        "startedAt": st.session_state.active_session_started_at or responses[0]["createdAt"],
+        "completedAt": completed_at,
+        "questionIds": [question["id"] for question in questions],
+        "responseIds": [response["id"] for response in responses],
+    }
+    st.session_state.sessions.append(session)
+    st.session_state.alerts.append(create_activity_alert(user["user_id"], session, responses))
+    return session
+
+
+def render_completed_session_summary(session_id):
     responses = [response for response in st.session_state.responses if response.get("sessionId") == session_id]
     if not responses:
         return
 
+    session = get_session(session_id)
+    task_label = session.get("label", "Task") if session else "Task"
     correct = sum(1 for response in responses if response["isCorrect"])
-    st.success(f"Reading task finished: {correct} of {len(responses)} correct.")
+    st.success(f"{task_label} finished: {correct} of {len(responses)} correct.")
     with st.expander("Review answers", expanded=True):
         for response in responses:
             status = "Correct" if response["isCorrect"] else "Incorrect"
@@ -695,10 +781,15 @@ def render_completed_reading_summary(session_id):
             st.info(response["explanation"])
 
 
+def get_session(session_id):
+    return next((session for session in st.session_state.sessions if session.get("id") == session_id), None)
+
+
 def create_activity_alert(user_id, session, responses, status="queued_mock"):
     child_name = STUDENT_PROFILES.get(user_id, {}).get("display_name", user_id)
     correct = sum(1 for response in responses if response["isCorrect"])
     weak_topics = list(dict.fromkeys(response["topicTitle"] for response in responses if not response["isCorrect"]))[:3]
+    action = "paused after" if session.get("status") == "paused" else "completed"
     return {
         "id": create_id("alert"),
         "userId": user_id,
@@ -707,7 +798,7 @@ def create_activity_alert(user_id, session, responses, status="queued_mock"):
         "to": "parent@example.local",
         "subject": f"Academy Alt activity: {child_name}",
         "body": (
-            f"{child_name} completed {len(responses)} questions with {correct} correct."
+            f"{child_name} {action} {len(responses)} questions with {correct} correct."
             + (f" Focus: {', '.join(weak_topics)}." if weak_topics else "")
         ),
         "createdAt": session["completedAt"],
@@ -1328,6 +1419,8 @@ def closest_age(questions, target, min_age, max_age):
 def reset_quiz():
     st.session_state.active_questions = []
     st.session_state.active_index = 0
+    st.session_state.active_session_id = None
+    st.session_state.active_session_started_at = None
     st.session_state.question_started_at = None
     st.session_state.session_done = False
 
