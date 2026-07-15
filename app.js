@@ -383,7 +383,7 @@ function getCurrentPracticeConfig() {
     subject: {
       mode: "subject",
       label: "Subject Quiz",
-      detail: `10 questions from ${subjectLabel}, chosen around your current target level.`,
+      detail: `10 questions from ${subjectLabel}, chosen around your current target age.`,
       count: 10,
       subject: state.subjectQuizSubject,
       subjects: [state.subjectQuizSubject]
@@ -391,7 +391,7 @@ function getCurrentPracticeConfig() {
     challenge: {
       mode: "challenge",
       label: "Challenges",
-      detail: "10 questions across subjects, nudged above your current target level.",
+      detail: "10 questions across subjects, nudged above your current target age.",
       count: 10,
       subject: "mixed",
       challengeBoost: 1
@@ -1854,7 +1854,9 @@ function saveQuestionResponse(question, selectedAnswer, confidenceValue, expecte
     articleId: getQuestionArticleId(question),
     questionRole: question.question_role || null,
     age: question.age || null,
+    targetAge: question.target_age || question.age || null,
     gradeLabel: question.grade_label || null,
+    internalLevel: question.internal_level || question.difficulty,
     difficulty: question.difficulty,
     expectedSeconds,
     elapsedSeconds,
@@ -1883,6 +1885,10 @@ function createQuestionSnapshot(question) {
     stimulus: question.stimulus || null,
     answer: question.answer || null,
     explanation: question.explanation || "",
+    target_age: question.target_age || question.age || null,
+    suitable_age_min: question.suitable_age_min || question.target_age || question.age || null,
+    suitable_age_max: question.suitable_age_max || question.target_age || question.age || null,
+    internal_level: question.internal_level || question.difficulty || null,
     followup_expected_seconds: question.followup_expected_seconds || null
   };
 }
@@ -2174,7 +2180,7 @@ function renderCurriculumQuestionCard(question, questionIndex, questionCount) {
       <div class="curriculum-question-head">
         <div>
           <span class="question-count">Question ${questionIndex + 1} of ${questionCount}</span>
-          <p>${escapeHtml(question.grade_label || `Age ${question.age}`)} - ${escapeHtml(formatLevel(question.difficulty))} - Target ${escapeHtml(formatSeconds(question.expected_seconds))}</p>
+          <p>${escapeHtml(question.grade_label || `Age ${question.age}`)} - Target time ${escapeHtml(formatSeconds(question.expected_seconds))}</p>
         </div>
         <div class="question-nav">
           <button class="secondary-button" type="button" data-question-nav="previous" ${isFirst ? "disabled" : ""}>Previous</button>
@@ -3190,7 +3196,9 @@ function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt,
     articleId: getQuestionArticleId(question),
     questionRole: question.question_role || null,
     age: question.age || null,
+    targetAge: question.target_age || question.age || null,
     gradeLabel: question.grade_label || null,
+    internalLevel: question.internal_level || question.difficulty,
     difficulty: question.difficulty,
     expectedSeconds,
     elapsedSeconds,
@@ -3297,7 +3305,7 @@ function formatSeconds(value) {
 
 function formatLevel(value) {
   const level = clamp(Math.round(Number(value || 1)), 1, 8);
-  return `Level ${level}`;
+  return `Age ${level + 7}`;
 }
 
 function scoreToLevel(score) {

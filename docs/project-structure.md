@@ -25,7 +25,7 @@ academy_alt/
 - `index.html`: Student and parent screens.
 - `styles.css`: Responsive tablet-first UI.
 - `app.js`: Login, quiz flow, scoring, memory, parent dashboard, mock alerts.
-- `content/question-bank.json`: Generated question data. Current bank has 5,120 questions: 32 topics x 8 ages x 20 questions.
+- `content/question-bank.json`: Generated question data. Current bank has 6,020 questions across ages 8-15, including reading-comprehension article question sets.
 - `content/skill-map.json`: Topic-level skill graph for maths, English, verbal reasoning and non-verbal reasoning.
 - `content/curriculum-browser.json`: Parent-facing curriculum topics and sample questions.
 - `tools/generate_question_bank.py`: Repeatable generator for rebuilding `question-bank.json` and `skill-map.json` from the curriculum topics.

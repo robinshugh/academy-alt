@@ -10,9 +10,14 @@ The key rule is that scoring and analytics should depend on structured fields, n
   "subject": "maths",
   "strand": "fractions",
   "skill": "equivalent_fractions",
-  "year_band": "year_3_4",
+  "age": 10,
+  "target_age": 10,
+  "suitable_age_min": 9,
+  "suitable_age_max": 11,
+  "year_band": "age_10",
   "style": ["uk_national_curriculum", "11_plus_foundation"],
-  "difficulty": 2,
+  "internal_level": 3,
+  "difficulty": 3,
   "expected_seconds": 35,
   "question_type": "multiple_choice",
   "prompt": "Which fraction is equal to 2/4?",
@@ -115,7 +120,8 @@ The app writes this shape to local storage now. The backend should store the sam
   "subject": "maths",
   "strand": "fractions",
   "skill": "equivalent_fractions",
-  "difficulty": 2,
+  "targetAge": 10,
+  "difficulty": 3,
   "expectedSeconds": 35,
   "elapsedSeconds": 42,
   "confidence": 4,
@@ -145,7 +151,7 @@ The current prototype uses:
 mastery = accuracy * 65% + speed * 20% + confidence calibration * 15% - overconfidence penalty
 ```
 
-The app now builds an ability matrix from response events. Each row represents one curriculum topic and stores the current mastery estimate plus the next target difficulty for that topic.
+The app now builds an ability matrix from response events. Each row represents one curriculum topic and stores the current mastery estimate plus the next target age for that topic. The legacy `difficulty` field remains as an internal compatibility value where `difficulty = target_age - 7`.
 
 ```json
 {
@@ -160,11 +166,12 @@ The app now builds an ability matrix from response events. Each row represents o
   "minDifficulty": 1,
   "maxDifficulty": 8,
   "targetDifficulty": 4,
-  "recommendation": "Ready to stretch toward difficulty 4."
+  "targetAge": 11,
+  "recommendation": "Ready to stretch toward Age 11."
 }
 ```
 
-New quizzes are selected from this matrix: weaker or under-sampled topics are prioritised, and questions are chosen close to each topic's `targetDifficulty`. This is deliberately simple. Later it can be replaced by Bayesian knowledge tracing or item-response modelling without changing the response event format.
+New quizzes are selected from this matrix: weaker or under-sampled topics are prioritised, and questions are chosen close to each topic's target age. This is deliberately simple. Later it can be replaced by Bayesian knowledge tracing or item-response modelling without changing the response event format.
 
 ## AI tutor API shape
 

@@ -690,6 +690,9 @@ def save_response(user, question, selected, confidence, expected_seconds, elapse
         "topicTitle": question["topic_title"],
         "articleId": get_article_id(question),
         "questionRole": question.get("question_role"),
+        "age": question.get("age"),
+        "targetAge": question.get("target_age", question.get("age")),
+        "internalLevel": question.get("internal_level", question.get("difficulty", 1)),
         "difficulty": question.get("difficulty", 1),
         "expectedSeconds": expected_seconds,
         "elapsedSeconds": elapsed_seconds,
@@ -863,7 +866,7 @@ def render_parent(bank, skill_map):
         cols[1].metric("Accuracy", f"{round(correct / len(responses) * 100)}%" if responses else "0%")
         cols[2].metric("Avg pace", f"{avg_seconds}s" if responses else "-")
         cols[3].metric("Sessions", len(sessions))
-        cols[4].metric("Reading target", format_level(reading_row["targetDifficulty"]))
+        cols[4].metric("Reading age target", format_level(reading_row["targetDifficulty"]))
 
     with tabs[1]:
         render_matrix_table(matrix)
@@ -1467,7 +1470,7 @@ def question_role_label(role):
 
 
 def format_level(value):
-    return f"Level {clamp(round(value or 1), 1, 8)}"
+    return f"Age {clamp(round(value or 1), 1, 8) + 7}"
 
 
 def format_seconds(value):

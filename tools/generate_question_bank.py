@@ -418,7 +418,11 @@ def write_json(path, data):
 
 def normalise_question(subject, topic, age, index, question):
     subject_id = app_subject_id(subject["id"])
-    difficulty = question.pop("difficulty", default_difficulty(age, index))
+    question.pop("difficulty", None)
+    target_age = question.pop("target_age", age)
+    suitable_age_min = question.pop("suitable_age_min", target_age)
+    suitable_age_max = question.pop("suitable_age_max", target_age)
+    difficulty = internal_level_for_age(target_age)
     question_type = question["question_type"]
     expected_seconds = question.pop("expected_seconds", default_expected_seconds(subject_id, question_type, age))
     id_suffix = question.pop("id_suffix", f"q{index:02d}")
@@ -432,9 +436,13 @@ def normalise_question(subject, topic, age, index, question):
         "article_id": question.get("article_id"),
         "question_role": question.get("question_role"),
         "age": age,
+        "target_age": target_age,
+        "suitable_age_min": suitable_age_min,
+        "suitable_age_max": suitable_age_max,
         "grade_label": grade_label(age),
         "year_band": f"age_{age}",
         "style": style_for_subject(subject["id"]),
+        "internal_level": difficulty,
         "difficulty": difficulty,
         "expected_seconds": expected_seconds,
         "followup_expected_seconds": question.get("followup_expected_seconds"),
@@ -465,7 +473,11 @@ def grade_label(age):
 
 
 def default_difficulty(age, index):
-    return min(8, max(1, age - 7 + ((index - 1) // 5)))
+    return internal_level_for_age(age)
+
+
+def internal_level_for_age(age):
+    return min(8, max(1, int(round(age)) - 7))
 
 
 def default_expected_seconds(subject_id, question_type, age):

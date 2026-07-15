@@ -61,6 +61,24 @@ http://localhost:5173
 - Age bands: 8 to 15.
 - Format files live under `content/`.
 - Generation scripts live under `tools/`.
+- `target_age` is the main question suitability scale. The legacy `difficulty` field is kept as an internal compatibility value where `difficulty = target_age - 7`.
+
+## Audit Question Ages
+
+To ask ChatGPT/OpenAI to review suitable ages and produce a CSV report:
+
+```powershell
+$env:OPENAI_API_KEY="your_api_key"
+python -B tools\audit_question_ages.py --limit 20
+```
+
+The report is written to:
+
+```text
+reports/question-age-audit.csv
+```
+
+For a full run, omit `--limit`. Use `--resume` to continue an interrupted audit without repeating completed question IDs.
 
 ## Deployment
 
