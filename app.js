@@ -5,7 +5,7 @@ const STORAGE_KEYS = {
   abilityMatrix: "academy_alt_ability_matrix_v1"
 };
 
-const APP_ASSET_VERSION = "2026-07-15-v22";
+const APP_ASSET_VERSION = "2026-07-15-v23";
 
 const DEMO_USERS = [
   {

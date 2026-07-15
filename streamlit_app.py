@@ -107,8 +107,8 @@ def main():
 def render_login():
     st.subheader("Log in")
     with st.form("login"):
-        username = st.text_input("Username", value="alex").strip().lower()
-        password = st.text_input("Password", value="1234", type="password")
+        username = st.text_input("Username", value="").strip().lower()
+        password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Log in", type="primary")
 
     if submitted:
@@ -117,8 +117,6 @@ def render_login():
             st.session_state.user = user
             st.rerun()
         st.error("Invalid username or password.")
-
-    st.info("Demo accounts: `alex / 1234`, `son / 1234`, `daughter / 1234`; parent `parent / parent123`.")
 
 
 def render_sidebar(user):
@@ -225,7 +223,6 @@ def render_active_reading_sheet(user):
         confidences = {}
         for index, question in enumerate(questions):
             st.markdown(f"**Q{index + 1}. {question['prompt']}**")
-            st.caption(question_role_label(question.get("question_role")))
             answers[question["id"]] = st.radio(
                 "Answer",
                 options=[choice["id"] for choice in question.get("choices", [])],
@@ -784,7 +781,10 @@ def render_parent(bank, skill_map):
         filtered = sorted(filtered, key=lambda item: item["createdAt"], reverse=sort_order == "Newest first")
         for response in filtered:
             with st.container(border=True):
-                st.caption(f"{response['createdAt']} | {response['topicTitle']} | {response['questionRole'] or 'question'}")
+                st.caption(
+                    f"{response['createdAt']} | {response['topicTitle']} | "
+                    f"{question_role_label(response.get('questionRole'))}"
+                )
                 st.write(response["prompt"])
                 st.write(f"Student answer: {response.get('selectedAnswerText', response['selectedAnswer'])}")
                 st.write(f"Correct answer: {response['correctAnswer']}")

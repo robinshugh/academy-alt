@@ -1,4 +1,4 @@
-const CACHE_NAME = "academy-alt-v36";
+const CACHE_NAME = "academy-alt-v37";
 const CORE_ASSETS = [
   "./",
   "./index.html",
