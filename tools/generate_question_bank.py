@@ -3,6 +3,12 @@ import random
 from pathlib import Path
 
 from question_age_rules import apply_rule_based_age_audit
+from source_aligned_expansion import (
+    EXPANSION_RETAINED_TARGET,
+    EXPANSION_TEMPLATE_COUNT,
+    SOURCE_BASIS,
+    build_source_aligned_questions,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -380,12 +386,22 @@ def main():
                     else:
                         questions.append(normalise_question(subject, topic, age, index, question))
 
+    expansion_questions = build_source_aligned_questions(
+        curriculum,
+        normalise_question,
+        choice_question,
+        numeric_question,
+        target_seconds,
+    )
+    questions.extend(expansion_questions)
+
     generated_question_count = len(questions)
     age_audit = apply_rule_based_age_audit(questions)
     questions, deduplication = deduplicate_questions(questions)
+    questions, expansion_retention = retain_source_aligned_questions(questions, EXPANSION_RETAINED_TARGET)
 
     bank = {
-        "version": "0.4.1",
+        "version": "0.4.2",
         "curriculum": {
             "country": "UK and US",
             "basis": [
@@ -396,6 +412,14 @@ def main():
             "age_range": AGES,
             "questions_per_topic_per_age": QUESTIONS_PER_TOPIC_PER_AGE,
             "template_questions_generated": generated_question_count,
+            "source_aligned_expansion": {
+                "template_count": EXPANSION_TEMPLATE_COUNT,
+                "retained_target": EXPANSION_RETAINED_TARGET,
+                "retained_count": sum(1 for question in questions if question.get("generation_family") == "source_aligned_original"),
+                "retention": expansion_retention,
+                "source_basis": SOURCE_BASIS,
+                "copyright_policy": "Original practice questions generated from source-aligned skill patterns; no copied source questions.",
+            },
             "total_questions": len(questions),
             "generation": "deterministic_template_bank",
             "age_audit": age_audit,
@@ -407,6 +431,8 @@ def main():
     write_json(QUESTION_BANK_PATH, bank)
     write_json(SKILL_MAP_PATH, build_skill_map(curriculum))
     print(f"Wrote {len(questions)} questions to {QUESTION_BANK_PATH}")
+    print(f"Generated {EXPANSION_TEMPLATE_COUNT} source-aligned original templates")
+    print(f"Retained {expansion_retention['retained_count']} source-aligned original questions")
     print(f"Rule-based age audit changed {age_audit['changed_target_age_count']} target ages")
     print(f"Removed {deduplication['removed_duplicate_count']} duplicate target-age questions")
     print(f"Wrote skill map to {SKILL_MAP_PATH}")
@@ -462,6 +488,36 @@ def duplicate_keep_score(question):
     )
 
 
+def retain_source_aligned_questions(questions, retained_target):
+    source_questions = [question for question in questions if question.get("generation_family") == "source_aligned_original"]
+    core_questions = [question for question in questions if question.get("generation_family") != "source_aligned_original"]
+    retained_source = sorted(source_questions, key=source_retention_score)[:retained_target]
+    retained = sorted(
+        core_questions + retained_source,
+        key=lambda question: (
+            question["subject"],
+            question["topic_id"],
+            question["target_age"],
+            question["id"],
+        ),
+    )
+    return retained, {
+        "available_after_deduplication": len(source_questions),
+        "retained_count": len(retained_source),
+        "removed_after_retention_limit": max(0, len(source_questions) - len(retained_source)),
+    }
+
+
+def source_retention_score(question):
+    return (
+        question["subject"],
+        question["topic_id"],
+        abs(int(question.get("age", 8)) - int(question.get("target_age", question.get("age", 8)))),
+        question["target_age"],
+        question["id"],
+    )
+
+
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -506,6 +562,8 @@ def normalise_question(subject, topic, age, index, question):
         "stimulus": question.get("stimulus"),
         "answer": question["answer"],
         "explanation": question["explanation"],
+        "generation_family": question.get("generation_family", "core_template"),
+        "source_basis": question.get("source_basis"),
         "tags": [subject["id"], topic["id"], topic["strand"].lower(), f"age_{age}"],
         "prerequisite_skills": [],
         "misconception_tags": question.get("misconception_tags", [f"{topic['id']}_needs_review"]),

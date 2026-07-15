@@ -56,7 +56,8 @@ http://localhost:5173
 
 ## Content
 
-- Generated question bank: 3,938 retained questions from 6,020 deterministic templates.
+- Generated question bank: 5,937 retained questions from 8,420 deterministic templates.
+- Includes 2,000 retained source-aligned original questions calibrated against Khan Academy, Common Core, UK National Curriculum and 11+ familiarisation-style progressions. These are original generated questions, not copied source/test-bank items.
 - Coverage: maths, English language, verbal reasoning, non-verbal reasoning, and reading comprehension.
 - Age bands: 8 to 15.
 - Format files live under `content/`.

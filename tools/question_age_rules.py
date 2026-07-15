@@ -79,8 +79,12 @@ def audit_math(question, prompt, topic, current_age):
 def audit_number_place_value(prompt, current_age):
     numbers = extract_numbers(prompt)
     max_number = max([abs(value) for value in numbers] or [0])
+    if "rounds to" in prompt and "interval" in prompt:
+        return 15, "Upper and lower bounds after rounding."
     if "What is" in prompt and "^" in prompt:
-        return 11, "Powers require index notation fluency."
+        return 12, "Powers and standard form notation."
+    if "x 10^" in prompt:
+        return 12, "Standard form to ordinary number conversion."
     if "expanded form" in prompt:
         return 8 if max_number < 10000 else 9, "Expanded form uses place-value decomposition."
     if "nearest" in prompt or "Round" in prompt or "Estimate" in prompt:
@@ -206,6 +210,8 @@ def audit_ratio_proportion(prompt, current_age):
 def audit_algebra(prompt, current_age):
     if "simultaneous equations" in prompt:
         return 14, "Simultaneous linear equations."
+    if "x^2" in prompt or "quadratic" in prompt:
+        return 14, "Quadratic expression or equation."
     if "Factorise" in prompt:
         return 13, "Factorising a linear expression."
     if "Expand" in prompt:
@@ -226,6 +232,8 @@ def audit_algebra(prompt, current_age):
 
 
 def audit_geometry(prompt, current_age):
+    if "opposite a" in prompt and "degree angle" in prompt and "hypotenuse" in prompt:
+        return 15, "Right-triangle trigonometry."
     if "circumference" in prompt:
         return 14, "Circle formula with pi."
     if "hypotenuse" in prompt or "Pythagoras" in prompt:
@@ -254,6 +262,8 @@ def audit_geometry(prompt, current_age):
 def audit_statistics(prompt, current_age):
     if "line of best fit" in prompt:
         return 14, "Uses a linear model from a scatter graph."
+    if "yes-rate" in prompt:
+        return 15, "Compares conditional rates in a two-way table."
     if "percentage point" in prompt or "nearest whole percent" in prompt:
         return 13, "Percentage interpretation of data."
     if "interquartile range" in prompt:
