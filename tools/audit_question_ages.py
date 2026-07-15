@@ -66,6 +66,7 @@ Use review when the item is ambiguous or depends heavily on prior teaching.
 
 def main():
     args = parse_args()
+    load_env_file(ROOT / ".env")
     questions = load_questions(args)
     if args.limit:
         questions = questions[: args.limit]
@@ -116,6 +117,20 @@ def parse_args():
     parser.add_argument("--sleep-seconds", type=float, default=0.2, help="Pause between API calls.")
     parser.add_argument("--temperature", type=float, default=0.0, help="Model temperature.")
     return parser.parse_args()
+
+
+def load_env_file(path):
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
 
 def load_questions(args):
