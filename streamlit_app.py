@@ -1,6 +1,7 @@
 import json
 import time
 from collections import defaultdict
+from html import escape
 from pathlib import Path
 
 import pandas as pd
@@ -29,6 +30,11 @@ ROLE_ORDER = {
     "vocabulary": 3,
     "main_idea": 4,
     "evidence": 5,
+    "sequence": 6,
+    "cause_effect": 7,
+    "author_choice": 8,
+    "summary": 9,
+    "tone": 10,
 }
 
 
@@ -147,7 +153,7 @@ def render_student(bank, skill_map, user):
         "subject": "10 questions from one subject, chosen around the current target level.",
         "challenge": "10 mixed questions nudged above the current target level.",
         "review": "10 questions focused on weaker, slower, or overconfident areas.",
-        "reading": "One article with 5 linked comprehension questions.",
+        "reading": "One article with linked comprehension questions selected for the current level.",
     }
     st.write(mode_details[mode])
 
@@ -181,47 +187,48 @@ def render_active_quiz(bank, skill_map, user):
     render_stimulus(question.get("stimulus"))
     st.markdown(f"### {question['prompt']}")
 
-    with st.form(f"question-{question['id']}"):
-        selected = render_answer_input(question)
-        confidence = st.radio(
-            "Confidence",
-            options=[1, 2, 3, 4],
-            format_func=lambda value: CONFIDENCE_LABELS[value],
-            horizontal=True,
-        )
-        submitted = st.form_submit_button("Submit", type="primary")
-
-    if submitted:
-        if selected is None or str(selected).strip() == "":
-            st.error("Choose or type an answer before submitting.")
-            return
-        save_response(user, question, selected, confidence, expected_seconds)
-        if index + 1 >= len(questions):
-            st.session_state.session_done = True
-            st.session_state.active_questions = []
-            st.session_state.active_index = 0
-            st.session_state.question_started_at = None
-        else:
-            st.session_state.active_index += 1
-            st.session_state.question_started_at = time.time()
-        st.rerun()
+    selected = render_answer_input(question, f"answer-{question['id']}-{index}")
+    st.caption("Choose confidence to submit")
+    confidence_cols = st.columns(4)
+    for confidence, col in zip([1, 2, 3, 4], confidence_cols):
+        if col.button(CONFIDENCE_LABELS[confidence], key=f"confidence-{question['id']}-{index}-{confidence}"):
+            submit_current_answer(user, question, selected, confidence, expected_seconds, index, questions)
 
     if st.button("End practice"):
         reset_quiz()
         st.rerun()
 
 
-def render_answer_input(question):
+def render_answer_input(question, key):
     if question["question_type"] == "multiple_choice":
         choices = question.get("choices", [])
         selected_id = st.radio(
             "Answer",
             options=[choice["id"] for choice in choices],
             format_func=lambda choice_id: choice_text(question, choice_id),
+            index=None,
+            key=key,
         )
         return selected_id
 
-    return st.text_input("Answer")
+    return st.text_input("Answer", key=key)
+
+
+def submit_current_answer(user, question, selected, confidence, expected_seconds, index, questions):
+    if selected is None or str(selected).strip() == "":
+        st.error("Choose or type an answer before tapping your confidence.")
+        return
+
+    save_response(user, question, selected, confidence, expected_seconds)
+    if index + 1 >= len(questions):
+        st.session_state.session_done = True
+        st.session_state.active_questions = []
+        st.session_state.active_index = 0
+        st.session_state.question_started_at = None
+    else:
+        st.session_state.active_index += 1
+        st.session_state.question_started_at = time.time()
+    st.rerun()
 
 
 def render_stimulus(stimulus):
@@ -246,8 +253,157 @@ def render_stimulus(stimulus):
             st.bar_chart(pd.DataFrame(bars).set_index("label"))
         return
 
+    if stimulus.get("type") == "geometry_diagram":
+        st.markdown(render_geometry_diagram(stimulus), unsafe_allow_html=True)
+        return
+
+    if stimulus.get("type") == "coordinate_grid":
+        st.markdown(render_coordinate_grid(stimulus), unsafe_allow_html=True)
+        return
+
+    if stimulus.get("type") == "shape_sequence":
+        st.markdown(render_shape_sequence(stimulus), unsafe_allow_html=True)
+        return
+
     with st.expander("Question context"):
         st.json(stimulus)
+
+
+def render_svg_card(title, svg, alt=""):
+    return f"""
+    <figure style="margin:0 0 1rem 0; border:1px solid #d7dee8; border-radius:8px; background:#ffffff; padding:14px; max-width:760px;">
+      <figcaption style="margin-bottom:10px; color:#4b5563; font-weight:800;">{escape(str(title or "Diagram"))}</figcaption>
+      <div role="img" aria-label="{escape(str(alt or title or "Diagram"))}">
+        {svg}
+      </div>
+    </figure>
+    """
+
+
+def render_geometry_diagram(stimulus):
+    if stimulus.get("diagram") == "rectangle":
+        svg = f"""
+        <svg viewBox="0 0 520 260" width="100%" height="260" style="max-width:620px;">
+          <rect x="110" y="58" width="300" height="140" rx="3" fill="#e8f7f4" stroke="#157f74" stroke-width="4" />
+          <text x="260" y="42" text-anchor="middle" fill="#111827" font-size="22" font-weight="700">{escape(str(stimulus.get("width_label", "")))}</text>
+          <text x="428" y="134" text-anchor="middle" fill="#111827" font-size="22" font-weight="700">{escape(str(stimulus.get("height_label", "")))}</text>
+          <line x1="110" y1="214" x2="410" y2="214" stroke="#d49b27" stroke-width="3" />
+          <line x1="426" y1="58" x2="426" y2="198" stroke="#d49b27" stroke-width="3" />
+        </svg>
+        """
+        return render_svg_card(stimulus.get("title", "Rectangle"), svg, stimulus.get("alt", "Rectangle diagram"))
+
+    if stimulus.get("diagram") == "angle_on_line":
+        svg = f"""
+        <svg viewBox="0 0 520 260" width="100%" height="260" style="max-width:620px;">
+          <line x1="80" y1="185" x2="440" y2="185" stroke="#111827" stroke-width="5" stroke-linecap="round" />
+          <line x1="260" y1="185" x2="360" y2="70" stroke="#111827" stroke-width="5" stroke-linecap="round" />
+          <path d="M 318 185 A 58 58 0 0 0 298 125" fill="none" stroke="#d49b27" stroke-width="4" />
+          <path d="M 202 185 A 58 58 0 0 1 222 125" fill="none" stroke="#d49b27" stroke-width="4" />
+          <text x="345" y="142" text-anchor="middle" fill="#111827" font-size="22" font-weight="700">{escape(str(stimulus.get("known_angle_label", "")))}</text>
+          <text x="190" y="142" text-anchor="middle" fill="#111827" font-size="22" font-weight="700">{escape(str(stimulus.get("unknown_angle_label", "x")))}</text>
+        </svg>
+        """
+        return render_svg_card(stimulus.get("title", "Angles on a Straight Line"), svg, stimulus.get("alt", "Angle diagram"))
+
+    return render_svg_card("Diagram", "<p>Unsupported geometry diagram.</p>", stimulus.get("alt", "Diagram"))
+
+
+def render_coordinate_grid(stimulus):
+    min_x = int(stimulus.get("min_x", -5))
+    max_x = int(stimulus.get("max_x", 5))
+    min_y = int(stimulus.get("min_y", -5))
+    max_y = int(stimulus.get("max_y", 5))
+    width = 420
+    height = 420
+    pad = 42
+    plot_width = width - pad * 2
+    plot_height = height - pad * 2
+
+    def x_pos(value):
+        return pad + ((float(value) - min_x) / max(max_x - min_x, 1)) * plot_width
+
+    def y_pos(value):
+        return pad + ((max_y - float(value)) / max(max_y - min_y, 1)) * plot_height
+
+    parts = []
+    for x in range(min_x, max_x + 1):
+        px = x_pos(x)
+        style = "#111827" if x == 0 else "#d7dee8"
+        width_px = 2 if x == 0 else 1
+        parts.append(f'<line x1="{px}" y1="{pad}" x2="{px}" y2="{height - pad}" stroke="{style}" stroke-width="{width_px}" />')
+        parts.append(f'<text x="{px}" y="{height - 14}" text-anchor="middle" fill="#4b5563" font-size="13">{x}</text>')
+
+    for y in range(min_y, max_y + 1):
+        py = y_pos(y)
+        style = "#111827" if y == 0 else "#d7dee8"
+        width_px = 2 if y == 0 else 1
+        parts.append(f'<line x1="{pad}" y1="{py}" x2="{width - pad}" y2="{py}" stroke="{style}" stroke-width="{width_px}" />')
+        if y != 0:
+            parts.append(f'<text x="22" y="{py + 4}" text-anchor="middle" fill="#4b5563" font-size="13">{y}</text>')
+
+    for point in stimulus.get("points", []):
+        px = x_pos(point.get("x", 0))
+        py = y_pos(point.get("y", 0))
+        label = escape(str(point.get("label", "")))
+        parts.append(f'<circle cx="{px}" cy="{py}" r="7" fill="#d94f70" />')
+        parts.append(f'<text x="{px + 12}" y="{py - 10}" fill="#111827" font-size="18" font-weight="800">{label}</text>')
+
+    svg = f"""
+    <svg viewBox="0 0 {width} {height}" width="100%" height="420" style="max-width:520px;">
+      {''.join(parts)}
+    </svg>
+    """
+    return render_svg_card(stimulus.get("title", "Coordinate Grid"), svg, stimulus.get("alt", "Coordinate grid"))
+
+
+def render_shape_sequence(stimulus):
+    items = stimulus.get("items", [])
+    tile_width = 86
+    tile_height = 90
+    gap = 12
+    width = max(120, 20 + len(items) * tile_width + max(0, len(items) - 1) * gap)
+    height = 120
+    parts = []
+
+    for index, item in enumerate(items):
+        x = 10 + index * (tile_width + gap)
+        y = 15
+        center_x = x + tile_width / 2
+        center_y = y + 36
+        parts.append(f'<rect x="{x}" y="{y}" width="{tile_width}" height="{tile_height}" rx="8" fill="#ffffff" stroke="#d7dee8" />')
+
+        if item.get("missing"):
+            parts.append(f'<text x="{center_x}" y="{center_y + 12}" text-anchor="middle" fill="#d94f70" font-size="44" font-weight="900">?</text>')
+            continue
+
+        shape = item.get("shape", "square")
+        rotation = float(item.get("rotation", 0))
+        transform = f' transform="rotate({rotation} {center_x} {center_y})"' if rotation else ""
+        fill = "#157f74" if shape in {"triangle", "diamond"} else "#d49b27"
+
+        if shape == "triangle":
+            points = f"{center_x},{center_y - 28} {center_x + 30},{center_y + 24} {center_x - 30},{center_y + 24}"
+            parts.append(f'<polygon points="{points}" fill="{fill}"{transform} />')
+        elif shape == "circle":
+            parts.append(f'<circle cx="{center_x}" cy="{center_y}" r="28" fill="{fill}"{transform} />')
+        elif shape == "diamond":
+            points = f"{center_x},{center_y - 30} {center_x + 30},{center_y} {center_x},{center_y + 30} {center_x - 30},{center_y}"
+            parts.append(f'<polygon points="{points}" fill="{fill}"{transform} />')
+        else:
+            parts.append(f'<rect x="{center_x - 26}" y="{center_y - 26}" width="52" height="52" rx="4" fill="{fill}"{transform} />')
+
+        dots = int(item.get("dots", 0))
+        dot_start = center_x - (dots - 1) * 5
+        for dot in range(dots):
+            parts.append(f'<circle cx="{dot_start + dot * 10}" cy="{y + 78}" r="3" fill="#d49b27" />')
+
+    svg = f"""
+    <svg viewBox="0 0 {width} {height}" width="100%" height="{height}" style="max-width:760px;">
+      {''.join(parts)}
+    </svg>
+    """
+    return render_svg_card(stimulus.get("title", "Shape Sequence"), svg, stimulus.get("alt", "Shape sequence"))
 
 
 def save_response(user, question, selected, confidence, expected_seconds):
@@ -397,10 +553,30 @@ def select_reading_article(bank, matrix, attempts_by_question):
         avg_level = average([question.get("difficulty", 1) for question in questions])
         age_distance = abs(questions[0].get("age", 8) - reading_row["targetAge"])
         level_distance = abs(avg_level - reading_row["targetDifficulty"])
-        candidates.append((attempts * 80 + age_distance * 4 + level_distance * 18, article_id, questions))
+        question_count = reading_article_question_count(questions, avg_level)
+        candidates.append((attempts * 80 + age_distance * 4 + level_distance * 18, article_id, questions[:question_count]))
 
     candidates.sort(key=lambda item: (item[0], item[1]))
-    return candidates[0][2][:5] if candidates else []
+    return candidates[0][2] if candidates else []
+
+
+def reading_article_question_count(questions, average_difficulty):
+    stimulus = (questions[0].get("stimulus") or {}) if questions else {}
+    word_count = int(stimulus.get("word_count") or 0)
+    count = 4
+    if word_count >= 170:
+        count += 1
+    if word_count >= 200:
+        count += 1
+    if word_count >= 210:
+        count += 1
+    if average_difficulty >= 4:
+        count += 1
+    if average_difficulty >= 6:
+        count += 1
+    if average_difficulty >= 7:
+        count += 1
+    return clamp(count, 4, min(10, len(questions)))
 
 
 def pick_question(bank, row, attempts_by_question, selected_ids, boost):
