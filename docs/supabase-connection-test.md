@@ -38,3 +38,22 @@ Supabase connection OK
 - parent/student permissions
 
 Those come after the basic project/key connection works.
+
+## Email Send Smoke Test
+
+This sends a Supabase Auth OTP/magic-link email. It is only a connectivity test for Supabase email delivery, not the final parent activity alert implementation.
+
+```powershell
+$env:SUPABASE_TEST_EMAIL="robin.shu@gmail.com"
+python -B tools\test_supabase_auth_email.py
+```
+
+## REST Insert/Read Smoke Test
+
+First run `supabase/connection_tests.sql` in the Supabase SQL Editor. It creates a tiny `connection_tests` table and permissive test-only RLS policies for rows whose source is `academy_alt_connection_test`.
+
+Then run:
+
+```powershell
+python -B tools\test_supabase_table_rest.py
+```
