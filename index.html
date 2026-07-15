@@ -35,6 +35,8 @@
 
           <div class="demo-access" aria-label="Demo accounts">
             <span>Child: alex / 1234</span>
+            <span>Child: son / 1234</span>
+            <span>Child: daughter / 1234</span>
             <span>Parent: parent / parent123</span>
           </div>
         </div>
@@ -81,6 +83,7 @@
                   <span id="questionTargetTime">Target 35s</span>
                   <span id="questionTimer">0s</span>
                 </span>
+                <button id="backToMainPageButton" class="secondary-button compact-button" type="button">Back to Main Page</button>
               </div>
               <div class="question-area">
                 <p id="questionSkill" class="eyebrow">Skill</p>
@@ -109,7 +112,7 @@
               </div>
               <div id="sessionSummaryMetrics" class="metric-strip"></div>
               <div id="errorReviewList" class="review-list"></div>
-              <button id="backToStudentHomeButton" class="secondary-button" type="button">Back to practice</button>
+              <button id="backToStudentHomeButton" class="secondary-button" type="button">Back to Main Page</button>
             </div>
           </section>
         </div>
@@ -122,7 +125,11 @@
             <h2>Progress Dashboard</h2>
           </div>
           <div class="topbar-actions">
-            <button id="simulateHeatmapButton" class="secondary-button" type="button">Simulate heatmap</button>
+            <label class="profile-selector">
+              <span>Student</span>
+              <select id="parentChildSelect" aria-label="Choose student profile"></select>
+            </label>
+            <button id="simulateHeatmapButton" class="secondary-button" type="button">Simulate profile</button>
             <button id="resetDemoButton" class="secondary-button" type="button">Reset data</button>
             <button id="parentLogoutButton" class="secondary-button" type="button">Log out</button>
           </div>

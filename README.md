@@ -31,13 +31,13 @@ Student: alex / 1234
 Parent:  parent / parent123
 ```
 
-## Streamlit Prototype Features
+## Streamlit Production-Test Features
 
-- Student login with five practice modes: Today's Practice, Subject Quiz, Challenges, Review, and Reading.
-- Adaptive question selection using the latest ability matrix.
-- Reading comprehension mode with multi-paragraph passages and linked questions.
+- Student login with Reading only for the current production test.
+- Adaptive article selection using the latest reading ability matrix.
+- Reading comprehension mode with multi-paragraph passages, browser read-aloud, and linked questions.
 - Per-question expected time, actual time, confidence, correctness, answer, and explanation capture.
-- Parent dashboard with ability matrix, mistake review, response table, and CSV export.
+- Parent dashboard with selectable student profiles, ability matrix, recent activity, mistake review, response table, email-alert outbox, simulation, reset, and CSV export.
 - Uses the existing structured JSON curriculum and question bank.
 
 ## Run The Static Browser Prototype

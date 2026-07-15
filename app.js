@@ -5,7 +5,7 @@ const STORAGE_KEYS = {
   abilityMatrix: "academy_alt_ability_matrix_v1"
 };
 
-const APP_ASSET_VERSION = "2026-07-14-v18";
+const APP_ASSET_VERSION = "2026-07-15-v22";
 
 const DEMO_USERS = [
   {
@@ -17,12 +17,30 @@ const DEMO_USERS = [
     yearGroup: "Year 4"
   },
   {
+    id: "student-son",
+    role: "student",
+    username: "son",
+    password: "1234",
+    displayName: "Son",
+    yearGroup: "Year 5",
+    demoSeed: "son-profile"
+  },
+  {
+    id: "student-daughter",
+    role: "student",
+    username: "daughter",
+    password: "1234",
+    displayName: "Daughter",
+    yearGroup: "Year 3",
+    demoSeed: "daughter-profile"
+  },
+  {
     id: "parent-robin",
     role: "parent",
     username: "parent",
     password: "parent123",
     displayName: "Parent",
-    childIds: ["student-alex"]
+    childIds: ["student-alex", "student-son", "student-daughter"]
   }
 ];
 
@@ -46,9 +64,11 @@ const state = {
   readingAnswers: {},
   readingSubmitted: {},
   readingLastSubmittedAt: 0,
+  readingSpeechUtterance: null,
   studentPracticeMode: "today",
   subjectQuizSubject: "maths",
   parentDashboardPage: "overview",
+  selectedParentChildId: null,
   mistakeFilters: {
     subject: "all",
     topic: "all",
@@ -88,6 +108,7 @@ function bindElements() {
     "startPracticeButton",
     "studentHome",
     "quizPanel",
+    "backToMainPageButton",
     "sessionSummary",
     "quizProgress",
     "questionTargetTime",
@@ -103,6 +124,7 @@ function bindElements() {
     "errorReviewList",
     "backToStudentHomeButton",
     "parentOverviewTitle",
+    "parentChildSelect",
     "parentMetrics",
     "parentDashboardNav",
     "abilityHeatmap",
@@ -129,13 +151,14 @@ function bindEvents() {
   els.parentLogoutButton.addEventListener("click", logout);
   els.studentPracticeTabs.addEventListener("click", handleStudentPracticeTabClick);
   els.subjectQuizSelect.addEventListener("change", handleSubjectQuizChange);
+  els.parentChildSelect.addEventListener("change", handleParentChildChange);
   els.startPracticeButton.addEventListener("click", startPractice);
+  els.backToMainPageButton.addEventListener("click", handleBackToMainPageClick);
+  els.stimulusArea.addEventListener("click", handleStimulusAreaClick);
   els.answerArea.addEventListener("click", handleAnswerAreaClick);
   els.confidenceControls.addEventListener("click", handleConfidenceSubmit);
   els.backToStudentHomeButton.addEventListener("click", () => {
-    els.sessionSummary.hidden = true;
-    els.studentHome.hidden = false;
-    renderStudentHome();
+    returnToStudentHome();
   });
   els.resetDemoButton.addEventListener("click", resetDemoData);
   els.simulateHeatmapButton.addEventListener("click", simulateAlexHeatmap);
@@ -210,6 +233,8 @@ async function handleLogin(event) {
     showView("student");
     renderStudentHome();
   } else {
+    state.selectedParentChildId = getValidParentChildId(user.childIds?.[0]);
+    ensureDemoChildProfiles();
     showView("parent");
     renderParentDashboard();
   }
@@ -221,6 +246,7 @@ function renderLogin() {
 
 function logout() {
   clearInterval(state.timerId);
+  stopReadingAloud();
   state.timerId = null;
   state.currentUser = null;
   state.activeQuestions = [];
@@ -238,15 +264,18 @@ function showView(viewName) {
 }
 
 function renderStudentHome() {
+  stopReadingAloud();
   const user = state.currentUser;
   els.studentHome.hidden = false;
   els.quizPanel.hidden = true;
   els.sessionSummary.hidden = true;
+  els.studentLogoutButton.hidden = false;
   els.studentTitle.textContent = `${user.displayName}'s Learning Practice`;
   renderStudentPracticeMode();
 }
 
 function startPractice() {
+  stopReadingAloud();
   const userId = state.currentUser.id;
   const config = getCurrentPracticeConfig();
   state.activeQuestions = choosePracticeQuestions(userId, config);
@@ -276,6 +305,7 @@ function startPractice() {
   els.studentHome.hidden = true;
   els.sessionSummary.hidden = true;
   els.quizPanel.hidden = false;
+  els.studentLogoutButton.hidden = true;
 
   if (config.reading) {
     renderReadingQuiz();
@@ -283,6 +313,34 @@ function startPractice() {
   }
 
   renderQuestion();
+}
+
+function handleBackToMainPageClick() {
+  const hasResponses = Boolean(state.activeSession?.responseIds?.length);
+  clearInterval(state.timerId);
+  stopReadingAloud();
+  state.timerId = null;
+
+  if (hasResponses) {
+    finaliseActiveSession("paused");
+  }
+
+  returnToStudentHome();
+}
+
+function returnToStudentHome() {
+  clearInterval(state.timerId);
+  stopReadingAloud();
+  state.timerId = null;
+  state.activeQuestions = [];
+  state.activeSession = null;
+  state.currentIndex = 0;
+  state.selectedAnswer = null;
+  state.readingAnswers = {};
+  state.readingSubmitted = {};
+  state.readingLastSubmittedAt = 0;
+  els.quizError.textContent = "";
+  renderStudentHome();
 }
 
 function handleStudentPracticeTabClick(event) {
@@ -1098,6 +1156,7 @@ function capitalize(value) {
 }
 
 function renderQuestion() {
+  stopReadingAloud();
   clearInterval(state.timerId);
   state.selectedAnswer = null;
   els.quizError.textContent = "";
@@ -1216,6 +1275,76 @@ function handleAnswerAreaClick(event) {
   if (readingConfidence) {
     handleReadingConfidenceClick(readingConfidence);
   }
+}
+
+function handleStimulusAreaClick(event) {
+  const readButton = event.target.closest("button[data-read-passage]");
+  if (!readButton) return;
+
+  handleReadPassageClick(readButton);
+}
+
+function handleReadPassageClick(button) {
+  const card = button.closest(".reading-passage-card");
+  if (!card) return;
+
+  if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+    button.textContent = "Not available";
+    button.disabled = true;
+    return;
+  }
+
+  if (button.dataset.readingState === "speaking") {
+    stopReadingAloud();
+    return;
+  }
+
+  stopReadingAloud();
+
+  const title = card.querySelector("h4")?.textContent?.trim();
+  const paragraphs = [...card.querySelectorAll(".reading-passage-body p")]
+    .map((paragraph) => paragraph.textContent.trim())
+    .filter(Boolean);
+  const text = [title, ...paragraphs].filter(Boolean).join(". ");
+  if (!text) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-GB";
+  utterance.rate = 0.92;
+  utterance.pitch = 1;
+  state.readingSpeechUtterance = utterance;
+  updateReadAloudButton(button, true);
+
+  utterance.onend = () => {
+    if (state.readingSpeechUtterance !== utterance) return;
+    state.readingSpeechUtterance = null;
+    updateReadAloudButton(button, false);
+  };
+  utterance.onerror = () => {
+    if (state.readingSpeechUtterance !== utterance) return;
+    state.readingSpeechUtterance = null;
+    updateReadAloudButton(button, false);
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopReadingAloud() {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  state.readingSpeechUtterance = null;
+  document.querySelectorAll("button[data-read-passage]").forEach((button) => {
+    updateReadAloudButton(button, false);
+  });
+}
+
+function updateReadAloudButton(button, isSpeaking) {
+  button.dataset.readingState = isSpeaking ? "speaking" : "idle";
+  button.classList.toggle("active", isSpeaking);
+  button.textContent = isSpeaking ? "Click to Stop Reading" : "Click to Read";
+  button.setAttribute("aria-pressed", isSpeaking ? "true" : "false");
 }
 
 function handleReadingFinishClick(button) {
@@ -1439,11 +1568,16 @@ function renderReadingPassageStimulus(stimulus) {
   return `
     <article class="reading-passage-card" aria-label="${escapeHtml(stimulus.alt || stimulus.title || "Reading passage")}">
       <div class="reading-passage-head">
-        <div>
+        <div class="reading-passage-title">
           <span class="eyebrow">Reading Passage</span>
-          <h4>${escapeHtml(stimulus.title || "Untitled passage")}</h4>
+          <div class="reading-title-row">
+            <h4>${escapeHtml(stimulus.title || "Untitled passage")}</h4>
+            <button class="secondary-button read-aloud-button" type="button" data-read-passage aria-pressed="false">Click to Read</button>
+          </div>
         </div>
-        ${stimulus.word_count ? `<span class="reading-word-count">${escapeHtml(stimulus.word_count)} words</span>` : ""}
+        <div class="reading-passage-tools">
+          ${stimulus.word_count ? `<span class="reading-word-count">${escapeHtml(stimulus.word_count)} words</span>` : ""}
+        </div>
       </div>
       <div class="reading-passage-body">
         ${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
@@ -1755,17 +1889,37 @@ function createQuestionSnapshot(question) {
 
 function completeSession() {
   clearInterval(state.timerId);
+  stopReadingAloud();
   state.timerId = null;
-  state.activeSession.completedAt = new Date().toISOString();
-  const sessions = getSessions();
-  sessions.push(state.activeSession);
-  saveJson(STORAGE_KEYS.sessions, sessions);
-  saveAbilityMatrixSnapshot(state.activeSession.userId);
-  createActivityAlert(state.activeSession);
+  const completedSession = finaliseActiveSession("completed");
+  if (!completedSession) {
+    returnToStudentHome();
+    return;
+  }
 
   els.quizPanel.hidden = true;
   els.sessionSummary.hidden = false;
-  renderSessionSummary(state.activeSession);
+  els.studentLogoutButton.hidden = true;
+  renderSessionSummary(completedSession);
+}
+
+function finaliseActiveSession(status) {
+  if (!state.activeSession) return null;
+
+  const session = {
+    ...state.activeSession,
+    status,
+    completedAt: new Date().toISOString()
+  };
+  const sessions = getSessions();
+  if (!sessions.some((item) => item.id === session.id)) {
+    sessions.push(session);
+    saveJson(STORAGE_KEYS.sessions, sessions);
+    createActivityAlert(session);
+  }
+  saveAbilityMatrixSnapshot(session.userId);
+  state.activeSession = session;
+  return session;
 }
 
 function renderSessionSummary(session) {
@@ -1791,7 +1945,9 @@ function renderSessionSummary(session) {
 }
 
 function renderParentDashboard() {
-  const child = DEMO_USERS.find((user) => user.id === state.currentUser.childIds[0]);
+  ensureDemoChildProfiles();
+
+  const child = getSelectedParentChild();
   const responses = getResponses().filter((response) => response.userId === child.id);
   const sessions = getSessions().filter((session) => session.userId === child.id);
   const correct = responses.filter((response) => response.isCorrect).length;
@@ -1799,6 +1955,7 @@ function renderParentDashboard() {
     ? Math.round(responses.reduce((total, response) => total + response.elapsedSeconds, 0) / responses.length)
     : 0;
 
+  renderParentChildSelector(child.id);
   els.parentOverviewTitle.textContent = `${child.displayName} - ${child.yearGroup}`;
   els.parentMetrics.innerHTML = renderMetric("Attempts", responses.length.toString())
     + renderMetric("Accuracy", responses.length ? `${Math.round((correct / responses.length) * 100)}%` : "0%")
@@ -1810,6 +1967,24 @@ function renderParentDashboard() {
   renderCurriculumBrowser();
   renderAlerts(child.id);
   renderParentDashboardNavigation();
+}
+
+function renderParentChildSelector(selectedChildId) {
+  const children = getParentChildren();
+  els.parentChildSelect.innerHTML = children
+    .map((child) => `
+      <option value="${escapeHtml(child.id)}" ${child.id === selectedChildId ? "selected" : ""}>
+        ${escapeHtml(child.displayName)} - ${escapeHtml(child.yearGroup)}
+      </option>
+    `)
+    .join("");
+}
+
+function handleParentChildChange(event) {
+  state.selectedParentChildId = getValidParentChildId(event.target.value);
+  state.mistakeFilters.subject = "all";
+  state.mistakeFilters.topic = "all";
+  renderParentDashboard();
 }
 
 function handleParentDashboardNavClick(event) {
@@ -2120,11 +2295,12 @@ function renderSessionList(sessions) {
       const correct = sessionResponses.filter((response) => response.isCorrect).length;
       const startDate = formatDateTime(session.startedAt);
       const endDate = formatDateTime(getSessionEndTime(session, sessionResponses));
+      const statusLabel = session.status === "paused" ? "Paused" : "Completed";
       return `
         <article class="session-item">
           <strong>${escapeHtml(startDate)}</strong>
           <p class="session-meta">Ended: ${escapeHtml(endDate)}</p>
-          <p class="session-meta">${correct} of ${sessionResponses.length} correct in ${escapeHtml(session.label || session.subject)}</p>
+          <p class="session-meta">${escapeHtml(statusLabel)}: ${correct} of ${sessionResponses.length} correct in ${escapeHtml(session.label || session.subject)}</p>
         </article>
       `;
     })
@@ -2267,7 +2443,26 @@ function getResponseTopicId(response) {
 }
 
 function getParentChildId() {
-  return state.currentUser?.childIds?.[0] || "student-alex";
+  return getSelectedParentChild().id;
+}
+
+function getSelectedParentChild() {
+  const childId = getValidParentChildId(state.selectedParentChildId);
+  state.selectedParentChildId = childId;
+  return DEMO_USERS.find((user) => user.id === childId) || getParentChildren()[0];
+}
+
+function getValidParentChildId(candidateId) {
+  const children = getParentChildren();
+  if (children.some((child) => child.id === candidateId)) return candidateId;
+  return children[0]?.id || "student-alex";
+}
+
+function getParentChildren() {
+  const childIds = state.currentUser?.childIds?.length ? state.currentUser.childIds : ["student-alex"];
+  return childIds
+    .map((childId) => DEMO_USERS.find((user) => user.id === childId && user.role === "student"))
+    .filter(Boolean);
 }
 
 function renderAlerts(userId) {
@@ -2415,7 +2610,7 @@ function createActivityAlert(session) {
     status: "queued_mock",
     to: "parent@example.local",
     subject: `Academy Alt activity: ${child.displayName}`,
-    body: `${child.displayName} completed ${responses.length} questions with ${correct} correct.${uniqueWeakSkills.length ? ` Focus: ${uniqueWeakSkills.join(", ")}.` : ""}`,
+    body: `${child.displayName} ${session.status === "paused" ? "paused after" : "completed"} ${responses.length} questions with ${correct} correct.${uniqueWeakSkills.length ? ` Focus: ${uniqueWeakSkills.join(", ")}.` : ""}`,
     createdAt: new Date().toISOString(),
     sessionId: session.id
   };
@@ -2773,24 +2968,81 @@ function saveJson(key, value) {
 function resetDemoData() {
   if (!window.confirm("Reset all local demo attempts, sessions and alerts?")) return;
   Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
+  ensureDemoChildProfiles();
   renderParentDashboard();
 }
 
 function simulateAlexHeatmap() {
-  const child = DEMO_USERS.find((user) => user.id === "student-alex");
+  const child = getSelectedParentChild();
   if (!child) return;
 
-  if (!window.confirm("Replace Alex's local demo attempts with simulated heatmap data?")) return;
+  if (!window.confirm(`Replace ${child.displayName}'s local demo attempts with simulated heatmap data?`)) return;
 
+  replaceChildSimulatedData(child, `manual:${child.id}:${Date.now()}`);
+  renderParentDashboard();
+}
+
+function ensureDemoChildProfiles() {
+  const demoChildren = DEMO_USERS.filter((user) => user.role === "student" && user.demoSeed);
+  let responses = getResponses();
+  let sessions = getSessions();
+  let alerts = getAlerts();
+  let changed = false;
+
+  demoChildren.forEach((child) => {
+    if (responses.some((response) => response.userId === child.id)) return;
+
+    const history = buildSimulatedStudentHistory(child, child.demoSeed);
+    responses = responses.concat(history.responses);
+    sessions = sessions.concat(history.sessions);
+    alerts = alerts.concat(history.alerts);
+    changed = true;
+  });
+
+  if (!changed) return;
+
+  saveJson(STORAGE_KEYS.responses, responses);
+  saveJson(STORAGE_KEYS.sessions, sessions);
+  saveJson(STORAGE_KEYS.alerts, alerts);
+  demoChildren.forEach((child) => saveAbilityMatrixSnapshot(child.id));
+}
+
+function replaceChildSimulatedData(child, seed) {
+  const history = buildSimulatedStudentHistory(child, seed);
+
+  saveJson(
+    STORAGE_KEYS.responses,
+    getResponses()
+      .filter((response) => response.userId !== child.id)
+      .concat(history.responses)
+  );
+  saveJson(
+    STORAGE_KEYS.sessions,
+    getSessions()
+      .filter((session) => session.userId !== child.id)
+      .concat(history.sessions)
+  );
+  saveJson(
+    STORAGE_KEYS.alerts,
+    getAlerts()
+      .filter((alert) => alert.userId !== child.id)
+      .concat(history.alerts)
+  );
+  saveAbilityMatrixSnapshot(child.id);
+}
+
+function buildSimulatedStudentHistory(child, seed) {
+  const rng = createSeededRandom(seed);
   const simulatedResponses = [];
   const simulatedSessions = [];
+  const simulatedAlerts = [];
   const now = Date.now();
 
   getAllSkills().forEach((skill, skillIndex) => {
     const questions = getQuestionsForSkill(skill.id);
     if (!questions.length) return;
 
-    const profile = getSimulationProfile(skillIndex);
+    const profile = getSimulationProfileForChild(child, skill, skillIndex, rng);
     if (!profile.attempts) return;
 
     const sortedQuestions = questions
@@ -2802,69 +3054,123 @@ function simulateAlexHeatmap() {
 
     for (let index = 0; index < profile.attempts; index += 1) {
       const question = sortedQuestions[index % sortedQuestions.length];
-      const shouldBeCorrect = Math.random() < profile.accuracy;
+      const shouldBeCorrect = rng() < profile.accuracy;
+      const minutesAgo = 90 + simulatedResponses.length * randIntWithRng(28, 125, rng);
       const response = createSimulatedResponse({
         question,
         userId: child.id,
         isCorrect: shouldBeCorrect,
         pace: profile.pace,
-        createdAt: new Date(now - (simulatedResponses.length + 1) * 36 * 60 * 1000).toISOString()
+        createdAt: new Date(now - minutesAgo * 60 * 1000).toISOString(),
+        rng
       });
       simulatedResponses.push(response);
     }
   });
 
-  for (let index = 0; index < simulatedResponses.length; index += 8) {
-    const sessionResponses = simulatedResponses.slice(index, index + 8);
+  for (let index = 0; index < simulatedResponses.length;) {
+    const chunkSize = randIntWithRng(7, 10, rng);
+    const sessionResponses = simulatedResponses.slice(index, index + chunkSize);
+    index += chunkSize;
+
+    if (!sessionResponses.length) continue;
+
     const sessionId = createId("session_sim");
     sessionResponses.forEach((response) => {
       response.sessionId = sessionId;
     });
-    simulatedSessions.push({
+    const session = {
       id: sessionId,
       userId: child.id,
       subject: "simulated",
+      mode: "simulated",
+      label: "Simulated profile",
       startedAt: getEarliestTimestamp(sessionResponses.map((response) => response.createdAt)) || new Date().toISOString(),
       completedAt: getLatestTimestamp(sessionResponses.map((response) => response.createdAt)) || new Date().toISOString(),
       questionIds: sessionResponses.map((response) => response.questionId),
       responseIds: sessionResponses.map((response) => response.id)
-    });
+    };
+    simulatedSessions.push(session);
   }
 
-  saveJson(
-    STORAGE_KEYS.responses,
-    getResponses()
-      .filter((response) => response.userId !== child.id)
-      .concat(simulatedResponses)
-  );
-  saveJson(
-    STORAGE_KEYS.sessions,
-    getSessions()
-      .filter((session) => session.userId !== child.id)
-      .concat(simulatedSessions)
-  );
-  saveJson(
-    STORAGE_KEYS.alerts,
-    getAlerts().filter((alert) => alert.userId !== child.id)
-  );
-  saveAbilityMatrixSnapshot(child.id);
-  renderParentDashboard();
+  simulatedSessions.slice(-4).forEach((session) => {
+    const sessionResponses = simulatedResponses.filter((response) => session.responseIds.includes(response.id));
+    const correct = sessionResponses.filter((response) => response.isCorrect).length;
+    const weakSkills = [...new Set(
+      sessionResponses
+        .filter((response) => !response.isCorrect)
+        .map((response) => getSkillLabel(response.skill))
+    )].slice(0, 3);
+
+    simulatedAlerts.push({
+      id: createId("alert_sim"),
+      userId: child.id,
+      channel: "email",
+      status: "seeded_mock",
+      to: "parent@example.local",
+      subject: `Academy Alt activity: ${child.displayName}`,
+      body: `${child.displayName} completed ${sessionResponses.length} questions with ${correct} correct.${weakSkills.length ? ` Focus: ${weakSkills.join(", ")}.` : ""}`,
+      createdAt: session.completedAt,
+      sessionId: session.id
+    });
+  });
+
+  return { responses: simulatedResponses, sessions: simulatedSessions, alerts: simulatedAlerts };
 }
 
-function getSimulationProfile(index) {
-  const profiles = [
-    { attempts: randInt(7, 10), accuracy: 0.9, pace: 0.72, difficulty: randInt(4, 7) },
-    { attempts: randInt(5, 8), accuracy: 0.68, pace: 1.02, difficulty: randInt(3, 6) },
-    { attempts: randInt(4, 7), accuracy: 0.38, pace: 1.42, difficulty: randInt(2, 5) },
-    { attempts: randInt(0, 2), accuracy: 0.55, pace: 1.15, difficulty: randInt(1, 3) }
-  ];
-  return profiles[index % profiles.length];
+function getSimulationProfileForChild(child, skill, skillIndex, rng) {
+  const patterns = {
+    "student-son": {
+      maths: { accuracy: 0.84, pace: 0.86, difficulty: 5 },
+      english: { accuracy: 0.58, pace: 1.22, difficulty: 3 },
+      verbal: { accuracy: 0.66, pace: 1.08, difficulty: 4 },
+      non_verbal: { accuracy: 0.79, pace: 0.94, difficulty: 5 }
+    },
+    "student-daughter": {
+      maths: { accuracy: 0.56, pace: 1.24, difficulty: 3 },
+      english: { accuracy: 0.86, pace: 0.88, difficulty: 5 },
+      verbal: { accuracy: 0.8, pace: 0.96, difficulty: 5 },
+      non_verbal: { accuracy: 0.62, pace: 1.12, difficulty: 4 }
+    }
+  };
+  const baseline = patterns[child.id]?.[skill.subjectId] || {
+    accuracy: 0.68,
+    pace: 1.04,
+    difficulty: 4
+  };
+
+  return {
+    attempts: randIntWithRng(5, 10, rng),
+    accuracy: clamp(baseline.accuracy + (rng() - 0.5) * 0.22, 0.25, 0.95),
+    pace: clamp(baseline.pace + (rng() - 0.5) * 0.36, 0.62, 1.55),
+    difficulty: clamp(Math.round(baseline.difficulty + randIntWithRng(-1, 2, rng) + (skillIndex % 3 === 0 ? 1 : 0)), 1, 8)
+  };
 }
 
-function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt }) {
+function createSeededRandom(seed) {
+  let value = 2166136261;
+  String(seed).split("").forEach((char) => {
+    value ^= char.charCodeAt(0);
+    value = Math.imul(value, 16777619);
+  });
+
+  return () => {
+    value += 0x6D2B79F5;
+    let next = value;
+    next = Math.imul(next ^ (next >>> 15), next | 1);
+    next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
+    return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randIntWithRng(min, max, rng) {
+  return Math.floor(rng() * (max - min + 1)) + min;
+}
+
+function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt, rng = Math.random }) {
   const expectedSeconds = Number(question.expected_seconds || 35);
-  const elapsedSeconds = Math.max(5, Math.round(expectedSeconds * pace * (0.8 + Math.random() * 0.45)));
-  const selectedAnswer = getSimulatedSelectedAnswer(question, isCorrect);
+  const elapsedSeconds = Math.max(5, Math.round(expectedSeconds * pace * (0.8 + rng() * 0.45)));
+  const selectedAnswer = getSimulatedSelectedAnswer(question, isCorrect, rng);
 
   return {
     id: createId("response_sim"),
@@ -2872,7 +3178,7 @@ function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt 
     userId,
     questionId: question.id,
     sourceQuestionId: question.sourceQuestionId || question.id,
-    variantSignature: `sim:${question.id}:${Math.random().toString(36).slice(2, 8)}`,
+    variantSignature: `sim:${question.id}:${Math.floor(rng() * 2176782336).toString(36).padStart(6, "0")}`,
     questionSnapshot: createQuestionSnapshot(question),
     questionPrompt: question.prompt,
     explanation: question.explanation,
@@ -2888,7 +3194,7 @@ function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt 
     difficulty: question.difficulty,
     expectedSeconds,
     elapsedSeconds,
-    confidence: getSimulatedConfidence(isCorrect, pace),
+    confidence: getSimulatedConfidence(isCorrect, pace, rng),
     selectedAnswer,
     correctAnswer: formatCorrectAnswer(question),
     isCorrect,
@@ -2897,24 +3203,25 @@ function createSimulatedResponse({ question, userId, isCorrect, pace, createdAt 
   };
 }
 
-function getSimulatedSelectedAnswer(question, isCorrect) {
+function getSimulatedSelectedAnswer(question, isCorrect, rng = Math.random) {
   if (isCorrect) return normaliseAnswer(question.answer.value);
 
   if (question.answer.type === "choice") {
-    return question.choices.find((choice) => choice.id !== question.answer.value)?.id || "A";
+    const wrongChoices = question.choices.filter((choice) => choice.id !== question.answer.value);
+    return wrongChoices[Math.floor(rng() * wrongChoices.length)]?.id || "A";
   }
 
   const correct = Number(question.answer.value);
   if (!Number.isFinite(correct)) return "";
   const offset = correct === 0 ? 1 : Math.max(1, Math.round(Math.abs(correct) * 0.12));
-  return String(correct + (Math.random() > 0.5 ? offset : -offset));
+  return String(correct + (rng() > 0.5 ? offset : -offset));
 }
 
-function getSimulatedConfidence(isCorrect, pace) {
+function getSimulatedConfidence(isCorrect, pace, rng = Math.random) {
   if (isCorrect && pace <= 0.85) return 4;
-  if (isCorrect) return Math.random() > 0.25 ? 3 : 2;
-  if (pace >= 1.35) return Math.random() > 0.45 ? 1 : 2;
-  return Math.random() > 0.55 ? 4 : 3;
+  if (isCorrect) return rng() > 0.25 ? 3 : 2;
+  if (pace >= 1.35) return rng() > 0.45 ? 1 : 2;
+  return rng() > 0.55 ? 4 : 3;
 }
 
 function countBy(items, key) {

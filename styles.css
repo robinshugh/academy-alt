@@ -28,7 +28,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -173,6 +174,11 @@ h3 {
   color: var(--teal-dark);
 }
 
+.compact-button {
+  min-height: 36px;
+  padding: 7px 12px;
+}
+
 .large-action {
   width: fit-content;
   min-width: 190px;
@@ -208,6 +214,35 @@ h3 {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.profile-selector {
+  display: grid;
+  gap: 4px;
+  min-width: 230px;
+}
+
+.profile-selector span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-selector select {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--ink);
+  padding: 8px 10px;
+  font-weight: 800;
+}
+
+.profile-selector select:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(35, 118, 108, 0.15);
 }
 
 .student-grid {
@@ -337,6 +372,7 @@ h3 {
 
 .quiz-topline {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
@@ -435,6 +471,39 @@ h3 {
   margin: 0;
   font-size: 20px;
   line-height: 1.25;
+}
+
+.reading-passage-title {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.reading-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.reading-passage-tools {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.read-aloud-button {
+  min-height: 32px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.read-aloud-button.active {
+  border-color: var(--teal);
+  background: var(--green-soft);
+  color: var(--teal-dark);
 }
 
 .reading-word-count {
@@ -1651,6 +1720,10 @@ h3 {
     justify-content: stretch;
   }
 
+  .profile-selector {
+    width: 100%;
+  }
+
   .topbar-actions .secondary-button,
   .topbar > .secondary-button {
     width: 100%;
@@ -1666,6 +1739,19 @@ h3 {
 
   .question-area h3 {
     font-size: 22px;
+  }
+
+  .quiz-topline {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .quiz-time-display {
+    justify-content: flex-start;
+  }
+
+  .quiz-topline .compact-button {
+    width: 100%;
   }
 
   .segmented-control,
@@ -1694,6 +1780,23 @@ h3 {
 
   .reading-finish-card button {
     width: 100%;
+  }
+
+  .reading-passage-head {
+    display: grid;
+  }
+
+  .reading-title-row {
+    align-items: stretch;
+  }
+
+  .reading-title-row .read-aloud-button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .reading-passage-tools {
+    justify-content: flex-start;
   }
 
   .segmented-control label + label,

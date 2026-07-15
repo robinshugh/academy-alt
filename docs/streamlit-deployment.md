@@ -64,6 +64,13 @@ streamlit_app.py
 
 The root `requirements.txt` tells Streamlit Cloud which Python packages to install.
 
+## Current Streamlit Test Scope
+
+- Student users see only the Reading task for this deployment test.
+- Parent users can switch between Alex, Son, and Daughter and review each profile separately.
+- Reading task results update the ability matrix and recent activity inside the running Streamlit session.
+- Browser read-aloud uses the device/browser speech engine and does not consume AI tokens.
+
 ## Current Prototype Limits
 
 - Response history is stored in `st.session_state`, so it is not permanent.

@@ -1,11 +1,15 @@
 import json
+import random
 import time
+import uuid
 from collections import defaultdict
+from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 ROOT = Path(__file__).resolve().parent
@@ -14,8 +18,18 @@ SKILL_MAP_PATH = ROOT / "content" / "skill-map.json"
 
 USERS = {
     "alex": {"password": "1234", "role": "student", "display_name": "Alex", "user_id": "student-alex"},
+    "son": {"password": "1234", "role": "student", "display_name": "Son", "user_id": "student-son"},
+    "daughter": {"password": "1234", "role": "student", "display_name": "Daughter", "user_id": "student-daughter"},
     "parent": {"password": "parent123", "role": "parent", "display_name": "Parent", "user_id": "parent-robin"},
 }
+
+STUDENT_PROFILES = {
+    "student-alex": {"display_name": "Alex", "year_group": "Year 4", "age": 9},
+    "student-son": {"display_name": "Son", "year_group": "Year 5", "age": 10},
+    "student-daughter": {"display_name": "Daughter", "year_group": "Year 3", "age": 8},
+}
+
+PARENT_CHILD_IDS = ["student-alex", "student-son", "student-daughter"]
 
 CONFIDENCE_LABELS = {
     1: "No idea",
@@ -55,12 +69,16 @@ def init_state():
     defaults = {
         "user": None,
         "responses": [],
+        "sessions": [],
+        "alerts": [],
         "active_questions": [],
         "active_index": 0,
         "question_started_at": None,
         "quiz_mode": "today",
         "subject": "maths",
         "session_done": False,
+        "completed_session_id": None,
+        "parent_child_id": "student-alex",
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -100,7 +118,7 @@ def render_login():
             st.rerun()
         st.error("Invalid username or password.")
 
-    st.info("Demo accounts: student `alex / 1234`; parent `parent / parent123`.")
+    st.info("Demo accounts: `alex / 1234`, `son / 1234`, `daughter / 1234`; parent `parent / parent123`.")
 
 
 def render_sidebar(user):
@@ -113,6 +131,8 @@ def render_sidebar(user):
 
     if st.sidebar.button("Reset prototype data"):
         st.session_state.responses = []
+        st.session_state.sessions = []
+        st.session_state.alerts = []
         reset_quiz()
         st.rerun()
 
@@ -124,48 +144,34 @@ def render_student(bank, skill_map, user):
         render_active_quiz(bank, skill_map, user)
         return
 
-    st.subheader(f"{user['display_name']}'s practice")
-    mode = st.radio(
-        "Practice type",
-        options=["today", "subject", "challenge", "review", "reading"],
-        format_func=lambda value: {
-            "today": "Today's Practice",
-            "subject": "Subject Quiz",
-            "challenge": "Challenges",
-            "review": "Review",
-            "reading": "Reading",
-        }[value],
-        index=["today", "subject", "challenge", "review", "reading"].index(st.session_state.quiz_mode),
-        horizontal=True,
+    st.session_state.quiz_mode = "reading"
+    reading_row = next(
+        (row for row in matrix if row["skillId"] == "english_reading_comprehension"),
+        {"attempts": 0, "mastery": 0, "targetDifficulty": 1, "targetAge": 8},
     )
-    st.session_state.quiz_mode = mode
 
-    if mode == "subject":
-        st.session_state.subject = st.selectbox(
-            "Subject",
-            options=["maths", "english", "verbal", "non_verbal"],
-            format_func=subject_label,
-            index=["maths", "english", "verbal", "non_verbal"].index(st.session_state.subject),
-        )
+    st.subheader(f"{user['display_name']}'s Reading")
+    st.write("One article with linked comprehension questions, selected from the latest reading ability profile.")
 
-    mode_details = {
-        "today": "20 questions across all subjects, selected from the current ability matrix.",
-        "subject": "10 questions from one subject, chosen around the current target level.",
-        "challenge": "10 mixed questions nudged above the current target level.",
-        "review": "10 questions focused on weaker, slower, or overconfident areas.",
-        "reading": "One article with linked comprehension questions selected for the current level.",
-    }
-    st.write(mode_details[mode])
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Reading attempts", reading_row["attempts"])
+    metric_cols[1].metric("Reading mastery", f"{reading_row['mastery']}%" if reading_row["attempts"] else "-")
+    metric_cols[2].metric("Next level", format_level(reading_row["targetDifficulty"]))
+    metric_cols[3].metric("Next age band", f"Age {reading_row['targetAge']}")
 
-    if st.button("Start", type="primary"):
-        questions = choose_questions(bank, matrix, user["user_id"], mode, st.session_state.subject)
+    if st.session_state.completed_session_id:
+        render_completed_reading_summary(st.session_state.completed_session_id)
+
+    if st.button("Start Reading Task", type="primary"):
+        questions = choose_questions(bank, matrix, user["user_id"], "reading", st.session_state.subject)
         if not questions:
-            st.error("No questions available for this mode.")
+            st.error("No reading articles are available.")
         else:
             st.session_state.active_questions = questions
             st.session_state.active_index = 0
             st.session_state.question_started_at = time.time()
             st.session_state.session_done = False
+            st.session_state.completed_session_id = None
             st.rerun()
 
     with st.expander("Current ability matrix", expanded=False):
@@ -173,6 +179,10 @@ def render_student(bank, skill_map, user):
 
 
 def render_active_quiz(bank, skill_map, user):
+    if st.session_state.quiz_mode == "reading":
+        render_active_reading_sheet(user)
+        return
+
     questions = st.session_state.active_questions
     index = st.session_state.active_index
     question = questions[index]
@@ -197,6 +207,71 @@ def render_active_quiz(bank, skill_map, user):
     if st.button("End practice"):
         reset_quiz()
         st.rerun()
+
+
+def render_active_reading_sheet(user):
+    questions = st.session_state.active_questions
+    article_stimulus = next((question.get("stimulus") for question in questions if question.get("stimulus")), None)
+    total_expected = sum(get_reading_question_expected_seconds(question, index == 0) for index, question in enumerate(questions))
+    avg_level = round(average([question.get("difficulty", 1) for question in questions]))
+
+    top = st.columns([1, 1, 1, 1])
+    top[0].metric("Questions", len(questions))
+    top[1].metric("Target time", format_seconds(total_expected))
+    top[2].metric("Level", format_level(avg_level))
+    if top[3].button("Back to Main Page"):
+        reset_quiz()
+        st.rerun()
+
+    render_stimulus(article_stimulus)
+    st.markdown("### Questions")
+
+    with st.form("reading-sheet"):
+        answers = {}
+        confidences = {}
+        for index, question in enumerate(questions):
+            expected_seconds = get_reading_question_expected_seconds(question, index == 0)
+            st.markdown(f"**Q{index + 1}. {question['prompt']}**")
+            st.caption(
+                f"{question_role_label(question.get('question_role'))} | "
+                f"Target {format_seconds(expected_seconds)} | {format_level(question.get('difficulty', 1))}"
+            )
+            answers[question["id"]] = st.radio(
+                "Answer",
+                options=[choice["id"] for choice in question.get("choices", [])],
+                format_func=lambda choice_id, q=question: choice_text(q, choice_id),
+                index=None,
+                key=f"reading-answer-{question['id']}",
+            )
+            confidences[question["id"]] = st.radio(
+                "Confidence",
+                options=[1, 2, 3, 4],
+                format_func=lambda value: CONFIDENCE_LABELS[value],
+                horizontal=True,
+                index=None,
+                key=f"reading-confidence-{question['id']}",
+            )
+            st.divider()
+
+        submitted = st.form_submit_button("Finish Reading Task", type="primary")
+
+    if not submitted:
+        return
+
+    missing = [
+        str(index + 1)
+        for index, question in enumerate(questions)
+        if not answers.get(question["id"]) or not confidences.get(question["id"])
+    ]
+    if missing:
+        st.error(f"Please answer every question and choose confidence. Missing: {', '.join(missing)}.")
+        return
+
+    elapsed_total = max(1, round(time.time() - (st.session_state.question_started_at or time.time())))
+    session = save_reading_sheet(user, questions, answers, confidences, elapsed_total)
+    reset_quiz()
+    st.session_state.completed_session_id = session["id"]
+    st.rerun()
 
 
 def render_answer_input(question, key):
@@ -236,11 +311,7 @@ def render_stimulus(stimulus):
         return
 
     if stimulus.get("type") == "reading_passage":
-        with st.container(border=True):
-            st.markdown(f"#### {stimulus.get('title', 'Reading passage')}")
-            st.caption(f"{stimulus.get('word_count', '-') } words")
-            for paragraph in stimulus.get("paragraphs", []):
-                st.write(paragraph)
+        render_reading_passage_with_audio(stimulus)
         return
 
     if stimulus.get("type") == "table":
@@ -267,6 +338,152 @@ def render_stimulus(stimulus):
 
     with st.expander("Question context"):
         st.json(stimulus)
+
+
+def render_reading_passage_with_audio(stimulus):
+    title = stimulus.get("title", "Reading passage")
+    paragraphs = stimulus.get("paragraphs", [])
+    text_to_read = ". ".join([title, *paragraphs])
+    component_id = f"read_{abs(hash((title, stimulus.get('word_count', 0))))}"
+    paragraph_html = "".join(f"<p>{escape(str(paragraph))}</p>" for paragraph in paragraphs)
+    height = min(580, max(310, 190 + len(paragraphs) * 70))
+
+    html = f"""
+    <section class="reading-card">
+      <header>
+        <div>
+          <span class="eyebrow">Reading Passage</span>
+          <div class="title-row">
+            <h2>{escape(str(title))}</h2>
+            <button id="{component_id}" type="button">Click to Read</button>
+          </div>
+        </div>
+        <span class="word-count">{escape(str(stimulus.get('word_count', '-')))} words</span>
+      </header>
+      <div class="body">{paragraph_html}</div>
+    </section>
+    <script>
+      const button = document.getElementById({json.dumps(component_id)});
+      const textToRead = {json.dumps(text_to_read)};
+      function setIdle() {{
+        button.dataset.state = "idle";
+        button.textContent = "Click to Read";
+        button.classList.remove("active");
+      }}
+      function setSpeaking() {{
+        button.dataset.state = "speaking";
+        button.textContent = "Click to Stop Reading";
+        button.classList.add("active");
+      }}
+      button.addEventListener("click", () => {{
+        if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {{
+          button.textContent = "Not available";
+          button.disabled = true;
+          return;
+        }}
+        if (button.dataset.state === "speaking") {{
+          window.speechSynthesis.cancel();
+          setIdle();
+          return;
+        }}
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = "en-GB";
+        utterance.rate = 0.92;
+        utterance.pitch = 1;
+        utterance.onend = setIdle;
+        utterance.onerror = setIdle;
+        setSpeaking();
+        window.speechSynthesis.speak(utterance);
+      }});
+      window.addEventListener("beforeunload", () => {{
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }});
+    </script>
+    <style>
+      :root {{
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }}
+      .reading-card {{
+        border: 1px solid #d8d1c1;
+        border-radius: 8px;
+        background: #fffdf7;
+        padding: 16px;
+        color: #25231f;
+      }}
+      header {{
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        border-bottom: 1px solid #d8d1c1;
+        padding-bottom: 12px;
+      }}
+      .eyebrow {{
+        color: #6f695d;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }}
+      .title-row {{
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 4px;
+      }}
+      h2 {{
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.2;
+      }}
+      button {{
+        min-height: 34px;
+        border: 1px solid #d8d1c1;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #25231f;
+        padding: 6px 12px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }}
+      button.active {{
+        border-color: #23766c;
+        background: #dceee8;
+        color: #15554d;
+      }}
+      .word-count {{
+        flex: 0 0 auto;
+        border-radius: 8px;
+        background: #dceee8;
+        color: #15554d;
+        padding: 5px 8px;
+        font-size: 12px;
+        font-weight: 900;
+      }}
+      .body {{
+        display: grid;
+        gap: 12px;
+        max-height: 360px;
+        overflow: auto;
+        padding-right: 4px;
+        margin-top: 12px;
+      }}
+      p {{
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.55;
+      }}
+      @media (max-width: 560px) {{
+        header {{ display: grid; }}
+        button {{ width: 100%; }}
+      }}
+    </style>
+    """
+    components.html(html, height=height, scrolling=True)
 
 
 def render_svg_card(title, svg, alt=""):
@@ -406,11 +623,13 @@ def render_shape_sequence(stimulus):
     return render_svg_card(stimulus.get("title", "Shape Sequence"), svg, stimulus.get("alt", "Shape sequence"))
 
 
-def save_response(user, question, selected, confidence, expected_seconds):
-    elapsed_seconds = max(1, round(time.time() - (st.session_state.question_started_at or time.time())))
+def save_response(user, question, selected, confidence, expected_seconds, elapsed_seconds=None, session_id=None, created_at=None):
+    elapsed_seconds = elapsed_seconds or max(1, round(time.time() - (st.session_state.question_started_at or time.time())))
     selected = str(selected).strip()
     is_correct = is_answer_correct(question, selected)
     response = {
+        "id": create_id("response"),
+        "sessionId": session_id,
         "userId": user["user_id"],
         "questionId": question["id"],
         "subject": question["subject"],
@@ -423,43 +642,165 @@ def save_response(user, question, selected, confidence, expected_seconds):
         "elapsedSeconds": elapsed_seconds,
         "confidence": confidence,
         "selectedAnswer": selected,
+        "selectedAnswerText": answer_text(question, selected),
         "correctAnswer": correct_answer_text(question),
         "isCorrect": is_correct,
         "prompt": question["prompt"],
         "explanation": question["explanation"],
-        "createdAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "createdAt": created_at or iso_now(),
     }
     st.session_state.responses.append(response)
+    return response
+
+
+def save_reading_sheet(user, questions, answers, confidences, elapsed_total):
+    session_id = create_id("session")
+    completed_at = iso_now()
+    started_at = datetime.fromtimestamp(st.session_state.question_started_at or time.time(), timezone.utc).isoformat(timespec="seconds")
+    total_expected = sum(get_reading_question_expected_seconds(question, index == 0) for index, question in enumerate(questions))
+    responses = []
+
+    for index, question in enumerate(questions):
+        expected_seconds = get_reading_question_expected_seconds(question, index == 0)
+        elapsed_seconds = max(1, round(elapsed_total * expected_seconds / max(total_expected, 1)))
+        response = save_response(
+            user,
+            question,
+            answers[question["id"]],
+            int(confidences[question["id"]]),
+            expected_seconds,
+            elapsed_seconds=elapsed_seconds,
+            session_id=session_id,
+            created_at=completed_at,
+        )
+        responses.append(response)
+
+    article_title = (questions[0].get("stimulus") or {}).get("title", "Reading task")
+    session = {
+        "id": session_id,
+        "userId": user["user_id"],
+        "mode": "reading",
+        "label": article_title,
+        "status": "completed",
+        "startedAt": started_at,
+        "completedAt": completed_at,
+        "questionIds": [question["id"] for question in questions],
+        "responseIds": [response["id"] for response in responses],
+    }
+    st.session_state.sessions.append(session)
+    st.session_state.alerts.append(create_activity_alert(user["user_id"], session, responses))
+    return session
+
+
+def render_completed_reading_summary(session_id):
+    responses = [response for response in st.session_state.responses if response.get("sessionId") == session_id]
+    if not responses:
+        return
+
+    correct = sum(1 for response in responses if response["isCorrect"])
+    st.success(f"Reading task finished: {correct} of {len(responses)} correct.")
+    with st.expander("Review answers", expanded=True):
+        for response in responses:
+            status = "Correct" if response["isCorrect"] else "Incorrect"
+            st.markdown(f"**{status}: {response['prompt']}**")
+            st.write(f"Your answer: {response.get('selectedAnswerText', response['selectedAnswer'])}")
+            st.write(f"Correct answer: {response['correctAnswer']}")
+            st.info(response["explanation"])
+
+
+def create_activity_alert(user_id, session, responses, status="queued_mock"):
+    child_name = STUDENT_PROFILES.get(user_id, {}).get("display_name", user_id)
+    correct = sum(1 for response in responses if response["isCorrect"])
+    weak_topics = list(dict.fromkeys(response["topicTitle"] for response in responses if not response["isCorrect"]))[:3]
+    return {
+        "id": create_id("alert"),
+        "userId": user_id,
+        "channel": "email",
+        "status": status,
+        "to": "parent@example.local",
+        "subject": f"Academy Alt activity: {child_name}",
+        "body": (
+            f"{child_name} completed {len(responses)} questions with {correct} correct."
+            + (f" Focus: {', '.join(weak_topics)}." if weak_topics else "")
+        ),
+        "createdAt": session["completedAt"],
+        "sessionId": session["id"],
+    }
 
 
 def render_parent(bank, skill_map):
     st.subheader("Parent dashboard")
-    responses = st.session_state.responses
-    matrix = compute_ability_matrix(bank, skill_map, "student-alex")
+    selected_child_id = st.selectbox(
+        "Student profile",
+        options=PARENT_CHILD_IDS,
+        format_func=student_label,
+        index=PARENT_CHILD_IDS.index(st.session_state.parent_child_id)
+        if st.session_state.parent_child_id in PARENT_CHILD_IDS
+        else 0,
+    )
+    st.session_state.parent_child_id = selected_child_id
 
-    col1, col2, col3 = st.columns(3)
-    correct = sum(1 for response in responses if response["isCorrect"])
-    col1.metric("Attempts", len(responses))
-    col2.metric("Accuracy", f"{round(correct / len(responses) * 100)}%" if responses else "0%")
-    col3.metric("Mistakes", len([response for response in responses if not response["isCorrect"]]))
+    action_cols = st.columns([1, 1, 3])
+    if action_cols[0].button("Simulate profile"):
+        simulate_student_profile(bank, skill_map, selected_child_id)
+        st.success(f"Simulated profile for {student_label(selected_child_id)}.")
+        st.rerun()
+    if action_cols[1].button("Reset data"):
+        st.session_state.responses = []
+        st.session_state.sessions = []
+        st.session_state.alerts = []
+        st.success("Prototype data reset.")
+        st.rerun()
 
-    tabs = st.tabs(["Ability Matrix", "Mistakes", "Responses"])
+    responses = [response for response in st.session_state.responses if response["userId"] == selected_child_id]
+    sessions = [session for session in st.session_state.sessions if session["userId"] == selected_child_id]
+    alerts = [alert for alert in st.session_state.alerts if alert["userId"] == selected_child_id]
+    matrix = compute_ability_matrix(bank, skill_map, selected_child_id)
+
+    tabs = st.tabs(["Overview", "Ability Matrix", "Recent Activity", "Mistakes", "Responses", "Email Alerts"])
     with tabs[0]:
-        render_matrix_table(matrix)
+        profile = STUDENT_PROFILES[selected_child_id]
+        correct = sum(1 for response in responses if response["isCorrect"])
+        avg_seconds = round(average([response["elapsedSeconds"] for response in responses]))
+        reading_row = next(
+            (row for row in matrix if row["skillId"] == "english_reading_comprehension"),
+            {"targetDifficulty": 1},
+        )
+        st.markdown(f"### {profile['display_name']} - {profile['year_group']}")
+        cols = st.columns(5)
+        cols[0].metric("Attempts", len(responses))
+        cols[1].metric("Accuracy", f"{round(correct / len(responses) * 100)}%" if responses else "0%")
+        cols[2].metric("Avg pace", f"{avg_seconds}s" if responses else "-")
+        cols[3].metric("Sessions", len(sessions))
+        cols[4].metric("Reading target", format_level(reading_row["targetDifficulty"]))
 
     with tabs[1]:
+        render_matrix_table(matrix)
+
+    with tabs[2]:
+        render_recent_activity(sessions, responses)
+
+    with tabs[3]:
         mistakes = [response for response in responses if not response["isCorrect"]]
         if not mistakes:
             st.info("No mistakes recorded in this prototype session.")
-        for response in reversed(mistakes):
+        subjects = ["all", *sorted({response["subject"] for response in mistakes})] if mistakes else ["all"]
+        subject = st.selectbox("Subject", subjects, format_func=lambda value: "All subjects" if value == "all" else subject_label(value))
+        filtered = [response for response in mistakes if subject == "all" or response["subject"] == subject]
+        topics = ["all", *sorted({response["topicTitle"] for response in filtered})] if filtered else ["all"]
+        topic = st.selectbox("Topic", topics, format_func=lambda value: "All topics" if value == "all" else value)
+        sort_order = st.radio("Taken", ["Newest first", "Oldest first"], horizontal=True)
+        filtered = [response for response in filtered if topic == "all" or response["topicTitle"] == topic]
+        filtered = sorted(filtered, key=lambda item: item["createdAt"], reverse=sort_order == "Newest first")
+        for response in filtered:
             with st.container(border=True):
                 st.caption(f"{response['createdAt']} | {response['topicTitle']} | {response['questionRole'] or 'question'}")
                 st.write(response["prompt"])
-                st.write(f"Your answer: {response['selectedAnswer']}")
+                st.write(f"Student answer: {response.get('selectedAnswerText', response['selectedAnswer'])}")
                 st.write(f"Correct answer: {response['correctAnswer']}")
                 st.info(response["explanation"])
 
-    with tabs[2]:
+    with tabs[4]:
         if responses:
             st.dataframe(pd.DataFrame(responses), use_container_width=True)
             st.download_button(
@@ -470,6 +811,187 @@ def render_parent(bank, skill_map):
             )
         else:
             st.info("No responses yet.")
+
+    with tabs[5]:
+        if not alerts:
+            st.info("No activity alerts yet.")
+        for alert in sorted(alerts, key=lambda item: item["createdAt"], reverse=True):
+            with st.container(border=True):
+                st.markdown(f"**{alert['subject']}**")
+                st.caption(f"{alert['status']} | {alert['createdAt']}")
+                st.write(alert["body"])
+
+
+def render_recent_activity(sessions, responses):
+    if not sessions:
+        st.info("No activity yet.")
+        return
+
+    response_by_id = {response["id"]: response for response in responses if "id" in response}
+    for session in sorted(sessions, key=lambda item: item.get("completedAt", ""), reverse=True)[:12]:
+        session_responses = [
+            response_by_id[response_id]
+            for response_id in session.get("responseIds", [])
+            if response_id in response_by_id
+        ]
+        correct = sum(1 for response in session_responses if response["isCorrect"])
+        with st.container(border=True):
+            st.markdown(f"**{session.get('label', 'Reading task')}**")
+            st.caption(
+                f"{session.get('status', 'completed').title()} | "
+                f"Started {session.get('startedAt', '-')} | Ended {session.get('completedAt', '-')}"
+            )
+            st.write(f"{correct} of {len(session_responses)} correct")
+
+
+def simulate_student_profile(bank, skill_map, user_id):
+    rng = random.Random(f"{user_id}:{time.time()}")
+    profile = STUDENT_PROFILES[user_id]
+    subject_patterns = {
+        "student-son": {
+            "maths": (0.84, 0.88, 5),
+            "english": (0.60, 1.20, 3),
+            "verbal": (0.66, 1.08, 4),
+            "non_verbal": (0.80, 0.94, 5),
+        },
+        "student-daughter": {
+            "maths": (0.56, 1.22, 3),
+            "english": (0.86, 0.88, 5),
+            "verbal": (0.80, 0.96, 5),
+            "non_verbal": (0.62, 1.12, 4),
+        },
+        "student-alex": {
+            "maths": (0.72, 1.02, 4),
+            "english": (0.70, 1.05, 4),
+            "verbal": (0.68, 1.08, 4),
+            "non_verbal": (0.74, 0.98, 4),
+        },
+    }
+    user = {
+        "user_id": user_id,
+        "display_name": profile["display_name"],
+    }
+    questions_by_skill = defaultdict(list)
+    for question in bank["questions"]:
+        questions_by_skill[question["skill"]].append(question)
+
+    simulated_responses = []
+    for skill_index, skill in enumerate(flatten_skills(skill_map)):
+        questions = questions_by_skill.get(skill["id"], [])
+        if not questions:
+            continue
+        accuracy, pace, target_level = subject_patterns[user_id].get(skill["subjectId"], (0.68, 1.05, 4))
+        target_age = clamp(profile["age"] + rng.choice([-1, 0, 0, 1]), 8, 15)
+        sorted_questions = sorted(
+            questions,
+            key=lambda question: (
+                abs(question.get("difficulty", target_level) - target_level),
+                abs(question.get("age", target_age) - target_age),
+                question["id"],
+            ),
+        )
+        for attempt in range(rng.randint(4, 8)):
+            question = sorted_questions[(attempt + skill_index) % len(sorted_questions)]
+            expected_seconds = int(question.get("expected_seconds") or 30)
+            elapsed_seconds = max(4, round(expected_seconds * pace * (0.82 + rng.random() * 0.44)))
+            is_correct = rng.random() < accuracy
+            selected = simulated_answer(question, is_correct, rng)
+            response = create_simulated_response(
+                user,
+                question,
+                selected,
+                simulated_confidence(is_correct, pace, rng),
+                expected_seconds,
+                elapsed_seconds,
+                is_correct,
+                created_at=simulated_timestamp(len(simulated_responses), rng),
+            )
+            simulated_responses.append(response)
+
+    simulated_sessions = []
+    simulated_alerts = []
+    for index in range(0, len(simulated_responses), 8):
+        chunk = simulated_responses[index : index + 8]
+        if not chunk:
+            continue
+        session_id = create_id("session_sim")
+        for response in chunk:
+            response["sessionId"] = session_id
+        session = {
+            "id": session_id,
+            "userId": user_id,
+            "mode": "simulated",
+            "label": "Simulated profile",
+            "status": "completed",
+            "startedAt": min(response["createdAt"] for response in chunk),
+            "completedAt": max(response["createdAt"] for response in chunk),
+            "questionIds": [response["questionId"] for response in chunk],
+            "responseIds": [response["id"] for response in chunk],
+        }
+        simulated_sessions.append(session)
+        if len(simulated_alerts) < 4:
+            simulated_alerts.append(create_activity_alert(user_id, session, chunk, status="seeded_mock"))
+
+    st.session_state.responses = [
+        response for response in st.session_state.responses if response["userId"] != user_id
+    ] + simulated_responses
+    st.session_state.sessions = [
+        session for session in st.session_state.sessions if session["userId"] != user_id
+    ] + simulated_sessions
+    st.session_state.alerts = [
+        alert for alert in st.session_state.alerts if alert["userId"] != user_id
+    ] + simulated_alerts
+
+
+def create_simulated_response(user, question, selected, confidence, expected_seconds, elapsed_seconds, is_correct, created_at):
+    return {
+        "id": create_id("response_sim"),
+        "sessionId": None,
+        "userId": user["user_id"],
+        "questionId": question["id"],
+        "subject": question["subject"],
+        "skill": question["skill"],
+        "topicTitle": question["topic_title"],
+        "articleId": get_article_id(question),
+        "questionRole": question.get("question_role"),
+        "difficulty": question.get("difficulty", 1),
+        "expectedSeconds": expected_seconds,
+        "elapsedSeconds": elapsed_seconds,
+        "confidence": confidence,
+        "selectedAnswer": str(selected),
+        "selectedAnswerText": answer_text(question, selected),
+        "correctAnswer": correct_answer_text(question),
+        "isCorrect": is_correct,
+        "prompt": question["prompt"],
+        "explanation": question["explanation"],
+        "createdAt": created_at,
+    }
+
+
+def simulated_answer(question, is_correct, rng):
+    if is_correct:
+        return str(question["answer"]["value"])
+    if question["answer"]["type"] == "choice":
+        wrong = [choice["id"] for choice in question.get("choices", []) if choice["id"] != question["answer"]["value"]]
+        return rng.choice(wrong or ["A"])
+    correct = float(question["answer"]["value"])
+    offset = 1 if correct == 0 else max(1, round(abs(correct) * 0.12))
+    return str(correct + (offset if rng.random() > 0.5 else -offset))
+
+
+def simulated_confidence(is_correct, pace, rng):
+    if is_correct and pace <= 0.9:
+        return 4
+    if is_correct:
+        return 3 if rng.random() > 0.25 else 2
+    if pace >= 1.25:
+        return 1 if rng.random() > 0.45 else 2
+    return 4 if rng.random() > 0.55 else 3
+
+
+def simulated_timestamp(index, rng):
+    seconds_ago = (index + 1) * rng.randint(24, 95) * 60
+    return datetime.fromtimestamp(time.time() - seconds_ago, timezone.utc).isoformat(timespec="seconds")
 
 
 def render_matrix_table(matrix):
@@ -546,15 +1068,25 @@ def select_reading_article(bank, matrix, attempts_by_question):
         if article_id:
             grouped[article_id].append(question)
 
+    attempts_by_title = defaultdict(int)
+    for questions in grouped.values():
+        title = (questions[0].get("stimulus") or {}).get("title", "")
+        attempts_by_title[title] += sum(attempts_by_question[question["id"]] for question in questions)
+
     candidates = []
     for article_id, questions in grouped.items():
         questions = sorted(questions, key=lambda question: (ROLE_ORDER.get(question.get("question_role"), 99), question["id"]))
+        title = (questions[0].get("stimulus") or {}).get("title", "")
         attempts = sum(attempts_by_question[question["id"]] for question in questions)
         avg_level = average([question.get("difficulty", 1) for question in questions])
         age_distance = abs(questions[0].get("age", 8) - reading_row["targetAge"])
         level_distance = abs(avg_level - reading_row["targetDifficulty"])
         question_count = reading_article_question_count(questions, avg_level)
-        candidates.append((attempts * 80 + age_distance * 4 + level_distance * 18, article_id, questions[:question_count]))
+        candidates.append((
+            attempts * 80 + attempts_by_title[title] * 45 + age_distance * 4 + level_distance * 18,
+            article_id,
+            questions[:question_count],
+        ))
 
     candidates.sort(key=lambda item: (item[0], item[1]))
     return candidates[0][2] if candidates else []
@@ -610,6 +1142,7 @@ def compute_ability_matrix(bank, skill_map, user_id):
     responses = [response for response in st.session_state.responses if response["userId"] == user_id]
     responses_by_skill = defaultdict(list)
     questions_by_skill = defaultdict(list)
+    default_age = STUDENT_PROFILES.get(user_id, {}).get("age", 8)
 
     for response in responses:
         responses_by_skill[response["skill"]].append(response)
@@ -626,18 +1159,21 @@ def compute_ability_matrix(bank, skill_map, user_id):
                         subject,
                         responses_by_skill[skill["id"]],
                         questions_by_skill[skill["id"]],
+                        default_age,
                     )
                 )
     return rows
 
 
-def build_ability_row(skill, subject, responses, questions):
+def build_ability_row(skill, subject, responses, questions, default_age):
     difficulties = [question.get("difficulty", 1) for question in questions]
     ages = [question.get("age", 8) for question in questions]
     min_level = min(difficulties or [1])
     max_level = max(difficulties or [8])
     min_age = min(ages or [8])
     max_age = max(ages or [15])
+    default_target_age = clamp(default_age, min_age, max_age)
+    default_target_level = clamp(default_target_age - 7, min_level, max_level)
 
     if not responses:
         return {
@@ -652,10 +1188,10 @@ def build_ability_row(skill, subject, responses, questions):
             "mastery": 0,
             "minDifficulty": min_level,
             "maxDifficulty": max_level,
-            "targetDifficulty": min_level,
-            "targetAge": min_age,
+            "targetDifficulty": default_target_level,
+            "targetAge": default_target_age,
             "recentConfidentWrong": 0,
-            "practicePriority": 90 - min_level,
+            "practicePriority": 90 - default_target_level,
         }
 
     recent = responses[-6:]
@@ -733,6 +1269,12 @@ def active_expected_seconds(question, questions, index, mode):
     return question.get("followup_expected_seconds", default) if seen_article else default
 
 
+def get_reading_question_expected_seconds(question, include_article_reading_time):
+    full_seconds = int(question.get("expected_seconds") or 30)
+    followup_seconds = int(question.get("followup_expected_seconds") or full_seconds)
+    return full_seconds if include_article_reading_time else followup_seconds
+
+
 def is_answer_correct(question, selected):
     expected = str(question["answer"]["value"]).strip()
     if question["answer"]["type"] == "numeric":
@@ -752,6 +1294,12 @@ def correct_answer_text(question):
     if question["answer"]["type"] == "choice":
         return choice_text(question, question["answer"]["value"])
     return str(question["answer"]["value"])
+
+
+def answer_text(question, answer_id):
+    if question["answer"]["type"] == "choice":
+        return choice_text(question, answer_id)
+    return str(answer_id)
 
 
 def get_article_id(question):
@@ -794,6 +1342,15 @@ def reset_quiz():
     st.session_state.session_done = False
 
 
+def flatten_skills(skill_map):
+    skills = []
+    for subject in skill_map["subjects"]:
+        for strand in subject["strands"]:
+            for skill in strand["skills"]:
+                skills.append({**skill, "subjectId": subject["id"]})
+    return skills
+
+
 def subject_label(subject_id):
     return {
         "maths": "Maths",
@@ -801,6 +1358,16 @@ def subject_label(subject_id):
         "verbal": "Verbal Reasoning",
         "non_verbal": "Non Verbal",
     }.get(subject_id, subject_id)
+
+
+def student_label(user_id):
+    profile = STUDENT_PROFILES.get(user_id, {"display_name": user_id, "year_group": ""})
+    suffix = f" - {profile['year_group']}" if profile.get("year_group") else ""
+    return f"{profile['display_name']}{suffix}"
+
+
+def question_role_label(role):
+    return str(role or "question").replace("_", " ").title()
 
 
 def format_level(value):
@@ -822,6 +1389,14 @@ def average(values):
 
 def clamp(value, minimum, maximum):
     return min(maximum, max(minimum, value))
+
+
+def iso_now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def create_id(prefix):
+    return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
 if __name__ == "__main__":
